@@ -1,4 +1,4 @@
-/*
+	/*
  * Copyright (C) 1997-2001 Id Software, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,6 +69,7 @@ cvar_t *cl_lightlevel;
 
 /* userinfo */
 cvar_t *name;
+cvar_t *nano_address;
 cvar_t *skin;
 cvar_t *rate;
 cvar_t *fov;
@@ -524,6 +525,7 @@ CL_InitLocal(void)
 
 	/* userinfo */
 	name = Cvar_Get("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
+	nano_address = Cvar_Get("nano_address", "noaddress", CVAR_USERINFO | CVAR_ARCHIVE);
 	skin = Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
 	rate = Cvar_Get("rate", "8000", CVAR_USERINFO | CVAR_ARCHIVE);
 	msg = Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
