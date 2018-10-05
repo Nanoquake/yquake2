@@ -419,6 +419,12 @@ CL_Userinfo_f(void)
 	Info_Print(Cvar_Userinfo());
 }
 
+void
+CL_PayNano_f(void)
+{
+    Com_Printf("Paying Nano to %s\n", cls.server_address);
+}
+
 /*
  * Restart the sound subsystem so it can pick up
  * new parameters and flush all sounds
@@ -548,6 +554,8 @@ CL_InitLocal(void)
 	Cmd_AddCommand("pause", CL_Pause_f);
 	Cmd_AddCommand("pingservers", CL_PingServers_f);
 	Cmd_AddCommand("skins", CL_Skins_f);
+    
+    Cmd_AddCommand("pay_nano", CL_PayNano_f);
 
 	Cmd_AddCommand("userinfo", CL_Userinfo_f);
 	Cmd_AddCommand("snd_restart", CL_Snd_Restart_f);

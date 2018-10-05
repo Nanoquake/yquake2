@@ -246,6 +246,7 @@ typedef struct
 	qboolean	demorecording;
 	qboolean	demowaiting; /* don't record until a non-delta message is received */
 	FILE		*demofile;
+	char            server_address[256];
 } client_static_t;
 
 extern client_static_t	cls;

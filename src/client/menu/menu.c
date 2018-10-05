@@ -2541,6 +2541,7 @@ JoinServerFunc(void *self)
         return;
     }
 
+    Q_strlcpy(cls.server_address, local_server_names[index], 61);
     Com_sprintf(buffer, sizeof(buffer), "connect %s\n",
                 NET_AdrToString(local_server_netadr[index]));
     Cbuf_AddText(buffer);

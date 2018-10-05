@@ -1,0 +1,3 @@
+[submodule "nano25519"]
+	path = nano25519
+	url = https://github.com/Nanoquake/nano25519.git
