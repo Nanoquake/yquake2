@@ -8,6 +8,7 @@ import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 
 raw_in_xrb = 1000000000000000000000000000000.0
+server_payin = 100000000000000000000000000000 #0.1Nano
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
@@ -83,7 +84,6 @@ class SimpleTcpClient(object):
             while True:
                 line = yield self.stream.read_until(b'\n')
                 self.log('got |%s|' % line.decode('utf-8').strip())
-                yield self.stream.write(line)
                 print("{} {}".format(time.strftime("%d/%m/%Y %H:%M:%S"),line))
                 split_data = line.rstrip().decode('utf8').split(",")
                 
@@ -95,9 +95,22 @@ class SimpleTcpClient(object):
                 elif split_data[0] == "pay_server":
                     print("Pay Nano to Server")
                     dest_account = 'xrb_' + split_data[1]
-                    amount = str(100000000000000000000000000000)
-                    print("account: {} seed: {} index: {} amount: {}".format(self.account, self.wallet_seed, self.index, amount))
-                    yield nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                    amount = str(server_payin)
+                    previous = nano.get_previous(self.account)
+                    current_balance = nano.get_balance(previous)
+                    if int(current_balance) >= server_payin:
+                        yield nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                    else:
+                        print("Error - insufficient funds")
+
+                elif split_data[0] == "balance":
+                    print("Nano Balance")
+                    previous = nano.get_previous(self.account)
+                    current_balance = nano.get_balance(previous)
+                    new_balance = float(current_balance) / raw_in_xrb
+                    print("Balance: {}".format(new_balance))
+                    return_string = "{} Nano".format(new_balance)
+                    yield self.stream.write(return_string.encode('ascii'))
 
         except tornado.iostream.StreamClosedError:
                 pass
@@ -121,9 +134,9 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
 
 @tornado.gen.coroutine
 def check_account(account, wallet_seed, index):
-    print("Check for blocks")
+    #print("Check for blocks")
     pending = nano.get_pending(str(account))
-    print("Pending Len:" + str(len(pending)))
+    #print("Pending Len:" + str(len(pending)))
     
     while len(pending) > 0:
         pending = nano.get_pending(str(account))
@@ -203,14 +216,22 @@ def main():
         print("Opening Account")
         nano.open_xrb(int(index), account, wallet_seed)
 
-    print("Rx Pending: ", pending)
+    #print("Rx Pending: ", pending)
     pending = nano.get_pending(str(account))
-    print("Pending Len:" + str(len(pending)))
+    #print("Pending Len:" + str(len(pending)))
 
     while len(pending) > 0:
         pending = nano.get_pending(str(account))
         print(len(pending))
         nano.receive_xrb(int(index), account, wallet_seed)
+    
+    previous = nano.get_previous(str(account))
+    current_balance = nano.get_balance(previous)
+    while int(current_balance) < server_payin:
+        print("Insufficient funds - please deposit at least 0.1 Nano")
+        wait_for_reply(account)
+    else:
+        print("Sufficient Funds - Lets Go!")
 
     print("Starting Quake2")
     game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
@@ -231,8 +252,6 @@ def main():
     
     # infinite loop
     tornado.ioloop.IOLoop.instance().start()
-
-print("Done")
 
 if __name__ == "__main__":
     

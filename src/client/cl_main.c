@@ -462,6 +462,46 @@ CL_PayNano_f(void)
     Com_Printf("Pay In Complete");
 }
 
+void
+CL_NanoBalance_f(void)
+{
+    //Com_Printf("Getting Your Nano Balance\n");
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        Com_Printf("[nano]: Socket creation error \n");
+        return;
+    }
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+    {
+        Com_Printf("[nano]: Invalid address/ Address not supported \n");
+        return;
+    }
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        Com_Printf("[nano]: Connection Failed \n");
+        return;
+    }
+    char buffer[128];
+    sprintf(buffer, "balance,0\n");
+    send(sock , buffer , strlen(buffer) , 0 );
+    
+    char server_reply[1024];
+    
+    if( recv(sock , server_reply , 1024 , 0) < 0)
+    {
+        Com_Printf("[nano]: Balance Failed \n");
+        return;
+    }
+    //int numbytes = recv(sock , server_reply , 1023 , 0);
+    
+    Com_Printf("Balance: %s\n", server_reply);
+    close(sock);
+}
+
 /*
  * Restart the sound subsystem so it can pick up
  * new parameters and flush all sounds
@@ -593,6 +633,7 @@ CL_InitLocal(void)
 	Cmd_AddCommand("skins", CL_Skins_f);
     
     Cmd_AddCommand("pay_nano", CL_PayNano_f);
+    Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
 
 	Cmd_AddCommand("userinfo", CL_Userinfo_f);
 	Cmd_AddCommand("snd_restart", CL_Snd_Restart_f);
