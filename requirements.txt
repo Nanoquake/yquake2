@@ -4,3 +4,4 @@ configparser
 pyqrcode
 websocket-client
 tornado
+pycryptodome

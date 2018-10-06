@@ -4,6 +4,9 @@ git submodule update
 cd simple-crypt
 python3 setup.py install
 cd ..
+cd nano25519
+python3 setup.py install
+cd ..
 
 pip3 install -r requirements.txt
 
@@ -21,3 +24,4 @@ cd Install/Data/baseq2
 cp pak0.pak ../../../release/baseq2/
 cp -a players ../../../release/baseq2/
 cd ../../../
+echo "Installation Complete"
