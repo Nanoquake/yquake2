@@ -1,3 +1,6 @@
 [submodule "nano25519"]
 	path = nano25519
 	url = https://github.com/Nanoquake/nano25519.git
+[submodule "simple-crypt"]
+	path = simple-crypt
+	url = https://github.com/Nanoquake/simple-crypt.git

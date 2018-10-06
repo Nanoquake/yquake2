@@ -1,0 +1,7 @@
+pyblake2
+bitstring
+configparser
+pyqrcode
+websocket-client
+simplecrypt
+tornado
