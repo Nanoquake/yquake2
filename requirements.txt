@@ -5,3 +5,4 @@ pyqrcode
 websocket-client
 tornado
 pycryptodome
+requests
