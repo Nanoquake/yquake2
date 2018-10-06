@@ -2,7 +2,7 @@ from configparser import SafeConfigParser
 from simplecrypt import encrypt, decrypt
 from nano25519 import ed25519_oop as ed25519
 from pyblake2 import blake2b
-from subprocess import Popen, PIPE
+import subprocess
 import binascii, time, io, pyqrcode, random, getpass, socket, sys
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
@@ -234,12 +234,13 @@ def main():
         print("Sufficient Funds - Lets Go!")
 
     print("Starting Quake2")
-    game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
+    #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
+    game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
     print(game_args) 
     full_command = "release/quake2 " + game_args
     print(full_command)
 
-    process = Popen(["release/quake2", game_args, "&"], stdout=PIPE, encoding='utf8', shell=True)
+    process = subprocess.run(full_command, shell=True)
 
     # tcp server
     server = SimpleTcpServer(account, wallet_seed, index)
