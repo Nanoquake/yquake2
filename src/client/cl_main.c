@@ -28,6 +28,18 @@
 #include "header/client.h"
 #include "input/header/input.h"
 
+/*Nanoquake*/
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+#define PORT 65432
+struct sockaddr_in address;
+int sock = 0, valread;
+struct sockaddr_in serv_addr;
+char buffer[1024] = {0};
+
 void CL_ForwardToServer_f(void);
 void CL_Changing_f(void);
 void CL_Reconnect_f(void);
@@ -423,6 +435,31 @@ void
 CL_PayNano_f(void)
 {
     Com_Printf("Paying Nano to %s\n", cls.server_address);
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        Com_Printf("[nano]: Socket creation error \n");
+        return;
+    }
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+    {
+        Com_Printf("[nano]: Invalid address/ Address not supported \n");
+        return;
+    }
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        Com_Printf("[nano]: Connection Failed \n");
+        return;
+    }
+    char buffer[128];
+    sprintf(buffer, "pay_server,%s\n", cls.server_address);
+    send(sock , buffer , strlen(buffer) , 0 );
+    
+    close(sock);
+    Com_Printf("Pay In Complete");
 }
 
 /*
@@ -912,6 +949,32 @@ CL_Shutdown(void)
 
 	isdown = true;
 
+    /*Shutdown Nanoquake */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        Com_Printf("[nano]: Socket creation error \n");
+        return;
+    }
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+    {
+        Com_Printf("[nano]: Invalid address/ Address not supported \n");
+        return;
+    }
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        Com_Printf("[nano]: Connection Failed \n");
+        return;
+    }
+    char buffer[128];
+    sprintf(buffer, "shutdown\n");
+    send(sock , buffer , strlen(buffer) , 0 );
+    
+    close(sock);
+    
 	CL_WriteConfiguration();
 
 	Key_WriteConsoleHistory();
