@@ -3,5 +3,4 @@ bitstring
 configparser
 pyqrcode
 websocket-client
-simplecrypt
 tornado
