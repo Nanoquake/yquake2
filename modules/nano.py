@@ -237,7 +237,6 @@ def open_xrb(index, account, wallet_seed):
 
 
 def send_xrb(dest_account, amount, account, index, wallet_seed):
-    print("account: {} seed: {} index: {} amount: {} dest_account: {}".format(account, wallet_seed, index, amount, dest_account))
     ws = create_connection('ws://yapraiwallet.space:8000')
 
     representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'

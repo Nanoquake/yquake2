@@ -197,8 +197,11 @@ def main():
     print(account)
     print(index)
 
+    previous = nano.get_previous(str(account))
+    current_balance = float(nano.get_balance(previous)) / raw_in_xrb
     display_qr(account)
-    print("This is your game account address: {}".format(account))
+    print("This is your game account address: {}, your balance is {} Nano".format(account, current_balance))
+
 
     while True:
         print("Nanoquake Menu")
@@ -219,6 +222,10 @@ def main():
 
         elif menu1 == 3:
             print("Withdraw Funds")
+            withdraw_dest = input("Destination Address: ")
+            previous = nano.get_previous(str(account))
+            current_balance = nano.get_balance(previous)
+            nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
 
         elif menu1 == 2:
             previous = nano.get_previous(str(account))
@@ -249,8 +256,13 @@ def main():
             while int(current_balance) < server_payin:
                 print("Insufficient funds - please deposit at least 0.1 Nano")
                 wait_for_reply(account)
+                while len(pending) > 0:
+                    pending = nano.get_pending(str(account))
+                    print(len(pending))
+                    nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
+                print("Your Balance: {}".format(current_balance))
 
         elif menu1 == 1:
             print("Starting Quake2")
