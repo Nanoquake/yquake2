@@ -200,59 +200,82 @@ def main():
     display_qr(account)
     print("This is your game account address: {}".format(account))
 
-    previous = nano.get_previous(str(account))
-    pending = nano.get_pending(str(account))
-    #print(previous)
+    while True:
+        print("Nanoquake Menu")
+        print("1. Start the Game")
+        print("2. TopUp Your Game Balance")
+        print("3. Withdraw Funds")
+        print("4. Exit")
+        
+        menu1 = 0
+        try:
+            menu1 = int(input("Please select an option: "))
+        except:
+            pass
 
-    if (len(previous) == 0) and (len(pending) == 0):
-        print("Please send at least 0.1Nano to this account")
-        print("Waiting for funds...")
-        wait_for_reply(account)
-    else:
-        print('You already have enough balance, great!')
+        if menu1 == 4:
+            print("Exiting Nanoquake")
+            sys.exit()
 
-    pending = nano.get_pending(str(account))
-    if (len(previous) == 0) and (len(pending) > 0):
-        print("Opening Account")
-        nano.open_xrb(int(index), account, wallet_seed)
+        elif menu1 == 3:
+            print("Withdraw Funds")
 
-    #print("Rx Pending: ", pending)
-    pending = nano.get_pending(str(account))
-    #print("Pending Len:" + str(len(pending)))
+        elif menu1 == 2:
+            previous = nano.get_previous(str(account))
+            pending = nano.get_pending(str(account))
+            #print(previous)
 
-    while len(pending) > 0:
-        pending = nano.get_pending(str(account))
-        print(len(pending))
-        nano.receive_xrb(int(index), account, wallet_seed)
-    
-    previous = nano.get_previous(str(account))
-    current_balance = nano.get_balance(previous)
-    while int(current_balance) < server_payin:
-        print("Insufficient funds - please deposit at least 0.1 Nano")
-        wait_for_reply(account)
-    else:
-        print("Sufficient Funds - Lets Go!")
+            if (len(previous) == 0) and (len(pending) == 0):
+                print("Please send at least 0.1Nano to this account")
+                print("Waiting for funds...")
+                wait_for_reply(account)
 
-    print("Starting Quake2")
-    #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
-    game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
-    print(game_args) 
-    full_command = "release/quake2 " + game_args
-    print(full_command)
+            pending = nano.get_pending(str(account))
+            if (len(previous) == 0) and (len(pending) > 0):
+                print("Opening Account")
+                nano.open_xrb(int(index), account, wallet_seed)
 
-    process = subprocess.run(full_command, shell=True)
+            #print("Rx Pending: ", pending)
+            pending = nano.get_pending(str(account))
+            #print("Pending Len:" + str(len(pending)))
 
-    # tcp server
-    server = SimpleTcpServer(account, wallet_seed, index)
-    server.listen(PORT, HOST)
-    print("Listening on %s:%d..." % (HOST, PORT))
-    
-    #
-    pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 10000)
-    pc.start()
-    
-    # infinite loop
-    tornado.ioloop.IOLoop.instance().start()
+            while len(pending) > 0:
+                pending = nano.get_pending(str(account))
+                print(len(pending))
+                nano.receive_xrb(int(index), account, wallet_seed)
+            
+            previous = nano.get_previous(str(account))
+            current_balance = nano.get_balance(previous)
+            while int(current_balance) < server_payin:
+                print("Insufficient funds - please deposit at least 0.1 Nano")
+                wait_for_reply(account)
+            else:
+                print("Sufficient Funds - Lets Go!")
+
+        elif menu1 == 1:
+            print("Starting Quake2")
+            #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
+            game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
+            print(game_args) 
+            full_command = "release/quake2 " + game_args
+            print(full_command)
+
+            process = subprocess.run(full_command, shell=True)
+
+            # tcp server
+            server = SimpleTcpServer(account, wallet_seed, index)
+            server.listen(PORT, HOST)
+            print("Listening on %s:%d..." % (HOST, PORT))
+            
+            #
+            pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 10000)
+            pc.start()
+            
+            # infinite loop
+            tornado.ioloop.IOLoop.instance().start()
+        else:
+            print("Error, incorret option selected")
+            sys.exit()
 
 if __name__ == "__main__":
     
