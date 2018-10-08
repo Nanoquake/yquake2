@@ -198,7 +198,11 @@ def main():
     print(index)
 
     previous = nano.get_previous(str(account))
-    current_balance = float(nano.get_balance(previous)) / raw_in_xrb
+    print(previous)
+    if previous != "":
+        current_balance = float(nano.get_balance(previous)) / raw_in_xrb
+    else:
+        current_balance = 0
     display_qr(account)
     print("This is your game account address: {}, your balance is {} Nano".format(account, current_balance))
 
