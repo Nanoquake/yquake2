@@ -5,3 +5,4 @@ websocket-client
 tornado
 pycryptodome
 requests
+prompt_toolkit

@@ -1,7 +1,8 @@
 from configparser import SafeConfigParser
 from nano25519 import ed25519_oop as ed25519
-from pyblake2 import blake2b
+from hashlib import blake2b
 import subprocess
+from prompt_toolkit import prompt
 from Cryptodome.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
@@ -152,8 +153,8 @@ def main():
     config_files = parser.read('config.ini')
 
     while True:
-        password = getpass.getpass('Enter password: ')
-        password_confirm = getpass.getpass('Confirm password: ')
+        password = prompt('Enter password: ', is_password=True)
+        password_confirm = prompt('Confirm password: ', is_password=True)
         if password == password_confirm:
             break
         print("Password Mismatch!")
