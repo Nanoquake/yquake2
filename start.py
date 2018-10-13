@@ -1,8 +1,8 @@
 from configparser import SafeConfigParser
-from simplecrypt import encrypt, decrypt
 from nano25519 import ed25519_oop as ed25519
 from pyblake2 import blake2b
 import subprocess
+from Cryptodome.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
@@ -29,7 +29,8 @@ def wait_for_reply(account):
 def read_encrypted(password, filename, string=True):
     with open(filename, 'rb') as input:
         ciphertext = input.read()
-        plaintext = decrypt(password, ciphertext)
+        des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
+        plaintext = des.decrypt(ciphertext)
         if string:
             return plaintext.decode('utf8')
         else:
@@ -37,7 +38,8 @@ def read_encrypted(password, filename, string=True):
 
 def write_encrypted(password, filename, plaintext):
     with open(filename, 'wb') as output:
-        ciphertext = encrypt(password, plaintext)
+        des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
+        ciphertext = des.encrypt(plaintext.encode('utf-8'))
         output.write(ciphertext)
 
 class SimpleTcpClient(object):
