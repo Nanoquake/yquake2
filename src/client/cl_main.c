@@ -28,10 +28,14 @@
 #include "header/client.h"
 #include "input/header/input.h"
 
-/*Nanoquake*/
-#include <sys/socket.h>
+#ifdef __WIN32__
+# include <winsock2.h>
+#else
+# include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
+
 #include <unistd.h>
 
 #define PORT 65432
@@ -434,6 +438,11 @@ CL_Userinfo_f(void)
 void
 CL_PayNano_f(void)
 {
+#ifdef __WIN32__
+   WORD versionWanted = MAKEWORD(1, 1);
+   WSADATA wsaData;
+   WSAStartup(versionWanted, &wsaData);
+#endif
     Com_Printf("Paying Nano to %s\n", cls.server_address);
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -458,13 +467,26 @@ CL_PayNano_f(void)
     sprintf(buffer, "pay_server,%s\n", cls.server_address);
     send(sock , buffer , strlen(buffer) , 0 );
     
-    close(sock);
+#ifdef __WIN32__
+  /* winsock requires a special function for sockets */
+  shutdown(sock, SD_BOTH);
+  closesocket(sock);
+  /* clean up winsock */
+  WSACleanup();  
+#else
+  close(sock);
+#endif
     Com_Printf("Pay In Complete");
 }
 
 void
 CL_NanoBalance_f(void)
 {
+#ifdef __WIN32__
+   WORD versionWanted = MAKEWORD(1, 1);
+   WSADATA wsaData;
+   WSAStartup(versionWanted, &wsaData);
+#endif
     //Com_Printf("Getting Your Nano Balance\n");
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -499,7 +521,15 @@ CL_NanoBalance_f(void)
     //int numbytes = recv(sock , server_reply , 1023 , 0);
     
     Com_Printf("Balance: %s\n", server_reply);
-    close(sock);
+#ifdef __WIN32__
+  /* winsock requires a special function for sockets */
+  shutdown(sock, SD_BOTH);
+  closesocket(sock);
+  /* clean up winsock */
+  WSACleanup();
+#else
+  close(sock);
+#endif
 }
 
 /*
@@ -632,8 +662,8 @@ CL_InitLocal(void)
 	Cmd_AddCommand("pingservers", CL_PingServers_f);
 	Cmd_AddCommand("skins", CL_Skins_f);
     
-    Cmd_AddCommand("pay_nano", CL_PayNano_f);
-    Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
+        Cmd_AddCommand("pay_nano", CL_PayNano_f);
+        Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
 
 	Cmd_AddCommand("userinfo", CL_Userinfo_f);
 	Cmd_AddCommand("snd_restart", CL_Snd_Restart_f);
@@ -991,6 +1021,11 @@ CL_Shutdown(void)
 	isdown = true;
 
     /*Shutdown Nanoquake */
+#ifdef __WIN32__
+   WORD versionWanted = MAKEWORD(1, 1);
+   WSADATA wsaData;
+   WSAStartup(versionWanted, &wsaData);
+#endif
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         Com_Printf("[nano]: Socket creation error \n");
@@ -1014,7 +1049,15 @@ CL_Shutdown(void)
     sprintf(buffer, "shutdown\n");
     send(sock , buffer , strlen(buffer) , 0 );
     
-    close(sock);
+#ifdef __WIN32__
+  /* winsock requires a special function for sockets */
+  shutdown(sock, SD_BOTH);
+  closesocket(sock);
+  /* clean up winsock */
+  WSACleanup();  
+#else
+  close(sock);
+#endif
     
 	CL_WriteConfiguration();
 

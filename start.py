@@ -57,7 +57,7 @@ class SimpleTcpClient(object):
         self.stream.socket.setsockopt(
             socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.stream.socket.setsockopt(
-            socket.IPPROTO_TCP, socket.SO_KEEPALIVE, 1)
+            socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.stream.set_close_callback(self.on_disconnect)
 
 

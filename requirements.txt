@@ -1,4 +1,3 @@
-pyblake2
 bitstring
 configparser
 pyqrcode
