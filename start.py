@@ -1,4 +1,4 @@
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 import subprocess
@@ -149,7 +149,7 @@ def check_account(account, wallet_seed, index):
 def main():
     print("Starting Nanoquake2")
 
-    parser = SafeConfigParser()
+    parser = ConfigParser()
     config_files = parser.read('config.ini')
 
     while True:
