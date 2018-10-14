@@ -4,7 +4,7 @@ from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
 from Cryptodome.Cipher import DES
-import binascii, time, io, pyqrcode, random, getpass, socket, sys
+import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 
@@ -275,8 +275,11 @@ def main():
             print("Starting Quake2")
             #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
             game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
-            print(game_args) 
-            full_command = "release/quake2 " + game_args
+            print(game_args)
+            if platform.system() == 'Windows':
+                full_command = "start quake2 " + game_args
+            else:
+                full_command = "release/quake2 " + game_args
             print(full_command)
 
             process = subprocess.run(full_command, shell=True)
