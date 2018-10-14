@@ -155,9 +155,12 @@ def main():
     while True:
         password = prompt('Enter password: ', is_password=True)
         password_confirm = prompt('Confirm password: ', is_password=True)
-        if password == password_confirm:
+        if password == password_confirm and len(password) == 8:
             break
-        print("Password Mismatch!")
+        if len(password) != 8:
+            print("Please enter a password of 8 characters (due to the use of DES to encrypt)")
+        else:
+            print("Password Mismatch!")
 
     if len(config_files) == 0:
         print("Generating Wallet Seed")
