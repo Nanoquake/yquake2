@@ -1,9 +1,6 @@
 echo "Installing Nanoquake"
 git submodule init
 git submodule update
-cd simple-crypt
-python3 setup.py install
-cd ..
 cd nano25519
 python3 setup.py install
 cd ..
