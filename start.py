@@ -108,9 +108,13 @@ class SimpleTcpClient(object):
 
                 elif split_data[0] == "balance":
                     print("Nano Balance")
-                    previous = nano.get_previous(self.account)
-                    current_balance = nano.get_balance(previous)
-                    new_balance = float(current_balance) / raw_in_xrb
+                    new_balance = 'Empty'
+                    try:
+                        previous = nano.get_previous(self.account)
+                        current_balance = nano.get_balance(previous)
+                        new_balance = float(current_balance) / raw_in_xrb
+                    except:
+                        pass
                     print("Balance: {}".format(new_balance))
                     return_string = "{} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
