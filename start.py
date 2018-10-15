@@ -3,10 +3,12 @@ from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
-from Cryptodome.Cipher import DES
+from Crypto.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
+
+import tkinter
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -17,6 +19,17 @@ def display_qr(account):
     data = 'xrb:' + account
     xrb_qr = pyqrcode.create(data, encoding='iso-8859-1')
     print(xrb_qr.terminal())
+
+#def display_qr(account):
+#    data = 'xrb:' + account
+#    print(data)
+#    xrb_qr = pyqrcode.create(data)
+#    code_xbm = xrb_qr.xbm(scale=4)
+#    top = tkinter.Tk()
+#    code_bmp = tkinter.BitmapImage(data=code_xbm)
+#    code_bmp.config(background="black")
+#    label = tkinter.Label(image=code_bmp)
+#    label.pack()
 
 def wait_for_reply(account):
     pending = nano.get_pending(str(account))
