@@ -467,6 +467,16 @@ CL_PayNano_f(void)
     sprintf(buffer, "pay_server,%s\n", cls.server_address);
     send(sock , buffer , strlen(buffer) , 0 );
     
+    char server_reply[1024];
+    
+    if( recv(sock , server_reply , 1024 , 0) < 0)
+    {
+        Com_Printf("[nano]: Pay In Failed \n");
+        return;
+    }
+    //int numbytes = recv(sock , server_reply , 1023 , 0);
+    
+    Com_Printf("[nano]: %s\n", server_reply);
 #ifdef __WIN32__
   /* winsock requires a special function for sockets */
   shutdown(sock, SD_BOTH);
@@ -476,7 +486,7 @@ CL_PayNano_f(void)
 #else
   close(sock);
 #endif
-    Com_Printf("Pay In Complete");
+//Com_Printf("Pay In Complete");
 }
 
 void

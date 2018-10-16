@@ -15,21 +15,22 @@ server_payin = 100000000000000000000000000000 #0.1Nano
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
-def display_qr(account):
-    data = 'xrb:' + account
-    xrb_qr = pyqrcode.create(data, encoding='iso-8859-1')
-    print(xrb_qr.terminal())
-
 #def display_qr(account):
 #    data = 'xrb:' + account
-#    print(data)
-#    xrb_qr = pyqrcode.create(data)
-#    code_xbm = xrb_qr.xbm(scale=4)
-#    top = tkinter.Tk()
-#    code_bmp = tkinter.BitmapImage(data=code_xbm)
-#    code_bmp.config(background="black")
-#    label = tkinter.Label(image=code_bmp)
-#    label.pack()
+#    xrb_qr = pyqrcode.create(data, encoding='iso-8859-1')
+#    print(xrb_qr.terminal())
+
+def display_qr(account):
+    data = 'xrb:' + account
+    print(data)
+    xrb_qr = pyqrcode.create(data)
+    code_xbm = xrb_qr.xbm(scale=4)
+    top = tkinter.Tk()
+    code_bmp = tkinter.BitmapImage(data=code_xbm)
+    code_bmp.config(background="white")
+    label = tkinter.Label(image=code_bmp)
+    label.pack()
+    top.mainloop()
 
 def wait_for_reply(account):
     pending = nano.get_pending(str(account))
@@ -115,9 +116,13 @@ class SimpleTcpClient(object):
                     previous = nano.get_previous(self.account)
                     current_balance = nano.get_balance(previous)
                     if int(current_balance) >= server_payin:
-                        yield nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                        return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                        return_string = "Block: {}".format(return_block)
+                        yield self.stream.write(return_string.encode('ascii'))
                     else:
                         print("Error - insufficient funds")
+                        return_string = "Error insufficent funds"
+                        yield self.stream.write(return_string.encode('ascii'))
 
                 elif split_data[0] == "balance":
                     print("Nano Balance")
@@ -217,16 +222,12 @@ def main():
     account = parser.get('wallet', 'account')
     index = int(parser.get('wallet', 'index'))
 
-    print(account)
-    print(index)
-
     previous = nano.get_previous(str(account))
-    print(previous)
     if previous != "":
         current_balance = float(nano.get_balance(previous)) / raw_in_xrb
     else:
         current_balance = 0
-    display_qr(account)
+
     print("This is your game account address: {}, your balance is {} Nano".format(account, current_balance))
 
 
@@ -235,7 +236,8 @@ def main():
         print("1. Start the Game")
         print("2. TopUp Your Game Balance")
         print("3. Withdraw Funds")
-        print("4. Exit")
+        print("4. Display Seed")
+        print("5. Exit")
         
         menu1 = 0
         try:
@@ -243,9 +245,12 @@ def main():
         except:
             pass
 
-        if menu1 == 4:
+        if menu1 == 5:
             print("Exiting Nanoquake")
             sys.exit()
+
+        elif menu1 == 4:
+             print("\nSeed: {}\n".format(wallet_seed))
 
         elif menu1 == 3:
             print("Withdraw Funds")
@@ -255,6 +260,7 @@ def main():
             nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
 
         elif menu1 == 2:
+            display_qr(account)
             previous = nano.get_previous(str(account))
             pending = nano.get_pending(str(account))
             #print(previous)
@@ -292,6 +298,9 @@ def main():
                 print("Your Balance: {}".format(current_balance))
 
         elif menu1 == 1:
+            previous = nano.get_previous(str(account))
+            current_balance = nano.get_balance(previous)
+            
             print("Starting Quake2")
             #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
             game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])

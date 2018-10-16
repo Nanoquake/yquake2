@@ -281,10 +281,11 @@ def send_xrb(dest_account, amount, account, index, wallet_seed):
     # print(data)
     ws.send(data)
 
-    block_reply = ws.recv()
-
-    #print(block_reply)
+    block_reply = json.loads(str(ws.recv()))
+    
     ws.close()
+
+    return block_reply['hash']
 
 
 def get_pow(hash):
@@ -347,14 +348,17 @@ def get_balance(hash):
     ws.close()
 
     rx_data = json.loads(str(block))
-    new_rx = json.loads(str(rx_data['contents']))
-    return new_rx['balance']
+    if len(rx_data) == 0:
+        return ""
+    else:
+        new_rx = json.loads(str(rx_data['contents']))
+        return new_rx['balance']
 
 
 def get_pending(account):
     # Get pending blocks
     ws = create_connection('ws://yapraiwallet.space:8000')
-    data = json.dumps({'action': 'pending', 'account': account, "count": "1", "source": "true"})
+    data = json.dumps({'action': 'pending', 'account': account, 'count': '1', 'source': 'true'})
 
     ws.send(data)
 
