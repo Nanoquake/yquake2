@@ -26,10 +26,13 @@ def display_qr(account):
     xrb_qr = pyqrcode.create(data)
     code_xbm = xrb_qr.xbm(scale=4)
     top = tkinter.Tk()
+    top.title("NanoQuake Wallet")
     code_bmp = tkinter.BitmapImage(data=code_xbm)
     code_bmp.config(background="white")
     label = tkinter.Label(image=code_bmp)
     label.pack()
+    textlabel = tkinter.Label(text="Close this window after scanning")
+    textlabel.pack()
     top.mainloop()
 
 def wait_for_reply(account):
