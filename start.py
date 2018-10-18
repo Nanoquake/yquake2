@@ -2,6 +2,7 @@ from configparser import ConfigParser
 from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 import subprocess
+import requests
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
@@ -172,7 +173,10 @@ def check_account(account, wallet_seed, index):
         nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
-    print("Starting Nanoquake2")
+    print("Starting Nanoquake2...")
+    print()
+
+    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake')
 
     parser = ConfigParser()
     config_files = parser.read('config.ini')
@@ -214,6 +218,7 @@ def main():
         seed = wallet_seed
 
     else:
+        print()
         print("Config file found")
         print("Decoding wallet seed with your password")
         try:
@@ -230,18 +235,28 @@ def main():
         current_balance = float(nano.get_balance(previous)) / raw_in_xrb
     else:
         current_balance = 0
+    print()
+    print("This is your game account address: {}".format(account))
+    print("Your balance is {} Nano".format(current_balance))
+    print()
+    print("NANO Rates")
+    print("- $:",r.json()['NANO']['USD'])
+    print("- £:",r.json()['NANO']['GBP'])
+    print("- €:",r.json()['NANO']['EUR'])
 
-    print("This is your game account address: {}, your balance is {} Nano".format(account, current_balance))
 
+ 
 
     while True:
+        print()
         print("Nanoquake Menu")
         print("1. Start the Game")
         print("2. TopUp Your Game Balance")
         print("3. Withdraw Funds")
         print("4. Display Seed")
         print("5. Exit")
-        
+        print()
+
         menu1 = 0
         try:
             menu1 = int(input("Please select an option: "))
@@ -328,7 +343,7 @@ def main():
             # infinite loop
             tornado.ioloop.IOLoop.instance().start()
         else:
-            print("Error, incorret option selected")
+            print("Error, incorrect option selected")
             sys.exit()
 
 if __name__ == "__main__":
