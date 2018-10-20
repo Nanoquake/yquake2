@@ -727,7 +727,7 @@ CL_InitLocal(void)
     
         Cmd_AddCommand("pay_nano", CL_PayNano_f);
         Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
-    Cmd_AddCommand("nano_balance", CL_NanoRates_f);
+    Cmd_AddCommand("nano_rates", CL_NanoRates_f);
     
 
 	Cmd_AddCommand("userinfo", CL_Userinfo_f);
