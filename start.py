@@ -140,6 +140,11 @@ class SimpleTcpClient(object):
                     return_string = "{} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
+                elif split_data[0] == "rates":
+                    print("Nano Rates")
+                    return_string = "Rates {}".format("0")
+                    yield self.stream.write(return_string.encode('ascii'))
+
         except tornado.iostream.StreamClosedError:
                 pass
 
