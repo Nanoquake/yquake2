@@ -436,6 +436,12 @@ CL_Userinfo_f(void)
 }
 
 void
+CL_NanoRates_f(void)
+{    
+	Com_Printf("Rates");
+}
+
+void
 CL_PayNano_f(void)
 {
 #ifdef __WIN32__
@@ -486,7 +492,6 @@ CL_PayNano_f(void)
 #else
   close(sock);
 #endif
-//Com_Printf("Pay In Complete");
 }
 
 void
@@ -674,6 +679,7 @@ CL_InitLocal(void)
     
         Cmd_AddCommand("pay_nano", CL_PayNano_f);
         Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
+        Cmd_AddCommand("nano_rates", CL_NanoRates_f);
 
 	Cmd_AddCommand("userinfo", CL_Userinfo_f);
 	Cmd_AddCommand("snd_restart", CL_Snd_Restart_f);

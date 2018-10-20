@@ -2,13 +2,11 @@ from configparser import ConfigParser
 from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 import subprocess
-import requests
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
-
 import tkinter
 
 raw_in_xrb = 1000000000000000000000000000000.0
@@ -132,12 +130,16 @@ class SimpleTcpClient(object):
                     print("Nano Balance")
                     new_balance = 'Empty'
                     try:
+                        r = nano.get_rates()
                         previous = nano.get_previous(self.account)
                         current_balance = nano.get_balance(previous)
                         new_balance = float(current_balance) / raw_in_xrb
                     except:
                         pass
                     print("Balance: {}".format(new_balance))
+                    print("- $:",r.json()['NANO']['USD']*new_balance)
+                    print("- £:",r.json()['NANO']['GBP']*new_balance)
+                    print("- €:",r.json()['NANO']['EUR']*new_balance)
                     return_string = "{} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
@@ -175,8 +177,6 @@ def check_account(account, wallet_seed, index):
 def main():
     print("Starting Nanoquake2...")
     print()
-
-    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake')
 
     parser = ConfigParser()
     config_files = parser.read('config.ini')
@@ -235,6 +235,7 @@ def main():
         current_balance = float(nano.get_balance(previous)) / raw_in_xrb
     else:
         current_balance = 0
+    r = nano.get_rates()
     print()
     print("This is your game account address: {}".format(account))
     print("Your balance is {} Nano".format(current_balance))
@@ -243,7 +244,6 @@ def main():
     print("- $:",r.json()['NANO']['USD'])
     print("- £:",r.json()['NANO']['GBP'])
     print("- €:",r.json()['NANO']['EUR'])
-
 
  
 
