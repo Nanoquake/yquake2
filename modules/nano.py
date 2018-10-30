@@ -183,6 +183,11 @@ def get_address(index, wallet_seed):
     print("Account Address: ", account)
     return account
 
+def get_rates():
+    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake')
+    print("Querying CryptoComapare for fiat rates")
+    return r
+
 
 def open_xrb(index, account, wallet_seed):
     ws = create_connection('ws://yapraiwallet.space:8000')
