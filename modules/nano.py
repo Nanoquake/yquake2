@@ -185,7 +185,7 @@ def get_address(index, wallet_seed):
 
 def get_rates():
     r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake')
-    print("Querying CryptoComapare for fiat rates")
+    print("Querying CryptoCompare for fiat rates")
     return r
 
 

@@ -284,8 +284,8 @@ def main():
             #print(previous)
 
             if (len(previous) == 0) and (len(pending) == 0):
-                print("Please send at least 0.1Nano to this account")
-                print("Waiting for funds...")
+                print("Please send at least 0.1 Nano to this account")
+                print("Waiting for funds. Close QR code window when ready...")
                 wait_for_reply(account)
 
             pending = nano.get_pending(str(account))

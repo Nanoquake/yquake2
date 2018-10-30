@@ -650,11 +650,11 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 					break;
 				case MOD_ROCKET:
 					message = "got rekt";
-					message2 = "'s rocket";
+					message2 = "'s raicket";
 					break;
 				case MOD_R_SPLASH:
 					message = "almost dodged";
-					message2 = "'s rocket";
+					message2 = "'s raicket";
 					break;
 				case MOD_HYPERBLASTER:
 					message = "was 51 percent attacked by";
@@ -688,7 +688,7 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 					message2 = "'s pain";
 					break;
 				case MOD_TELEFRAG:
-					message = "tried to invade";
+					message = "tried to fork";
 					message2 = "'s personal space";
 					break;
 			}
