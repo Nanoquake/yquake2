@@ -20,8 +20,9 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 #    print(xrb_qr.terminal())
 
 def display_qr(account):
-    data = 'xrb:' + account
+    data = 'account address:' + account
     print(data)
+    print("Close QR code window when ready...")
     xrb_qr = pyqrcode.create(data)
     code_xbm = xrb_qr.xbm(scale=4)
     top = tkinter.Tk()
@@ -285,7 +286,7 @@ def main():
 
             if (len(previous) == 0) and (len(pending) == 0):
                 print("Please send at least 0.1 Nano to this account")
-                print("Waiting for funds. Close QR code window when ready...")
+                print("Waiting for funds...")
                 wait_for_reply(account)
 
             pending = nano.get_pending(str(account))
@@ -313,7 +314,7 @@ def main():
                     nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
-                print("Your Balance: {}".format(current_balance))
+                print("Your balance is {} Nano".format(current_balance))
 
         elif menu1 == 1:
             previous = nano.get_previous(str(account))
