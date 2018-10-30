@@ -503,13 +503,13 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 		switch (mod)
 		{
 			case MOD_SUICIDE:
-				message = "suicides";
+				message = "shorted Nano";
 				break;
 			case MOD_FALLING:
-				message = "cratered";
+				message = "was bullish, on becoming a crater";
 				break;
 			case MOD_CRUSH:
-				message = "was squished";
+				message = "asked when marketing?";
 				break;
 			case MOD_WATER:
 				message = "sank like a rock";
@@ -536,7 +536,7 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 			case MOD_BOMB:
 			case MOD_SPLASH:
 			case MOD_TRIGGER_HURT:
-				message = "was in the wrong place";
+				message = "didn't read the whitepaper";
 				break;
 		}
 
@@ -630,14 +630,14 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 					message = "was gunned down by";
 					break;
 				case MOD_SSHOTGUN:
-					message = "was blown away by";
+					message = "was torn a new block-lattice by";
 					message2 = "'s super shotgun";
 					break;
 				case MOD_MACHINEGUN:
-					message = "was machinegunned by";
+					message = "got their seed scrambled by";
 					break;
 				case MOD_CHAINGUN:
-					message = "was cut in half by";
+					message = "was double spent by";
 					message2 = "'s chaingun";
 					break;
 				case MOD_GRENADE:
@@ -649,7 +649,7 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 					message2 = "'s shrapnel";
 					break;
 				case MOD_ROCKET:
-					message = "ate";
+					message = "got rekt";
 					message2 = "'s rocket";
 					break;
 				case MOD_R_SPLASH:
@@ -657,7 +657,7 @@ ClientObituary(edict_t *self, edict_t *inflictor /* unused */,
 					message2 = "'s rocket";
 					break;
 				case MOD_HYPERBLASTER:
-					message = "was melted by";
+					message = "was 51 percent attacked by";
 					message2 = "'s hyperblaster";
 					break;
 				case MOD_RAILGUN:
