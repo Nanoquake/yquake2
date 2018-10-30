@@ -7,7 +7,6 @@ from Crypto.Cipher import DES
 import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
-
 import tkinter
 
 raw_in_xrb = 1000000000000000000000000000000.0
@@ -131,18 +130,17 @@ class SimpleTcpClient(object):
                     print("Nano Balance")
                     new_balance = 'Empty'
                     try:
+                        r = nano.get_rates()
                         previous = nano.get_previous(self.account)
                         current_balance = nano.get_balance(previous)
                         new_balance = float(current_balance) / raw_in_xrb
                     except:
                         pass
                     print("Balance: {}".format(new_balance))
+                    print("- $:",r.json()['NANO']['USD']*new_balance)
+                    print("- £:",r.json()['NANO']['GBP']*new_balance)
+                    print("- €:",r.json()['NANO']['EUR']*new_balance)
                     return_string = "{} Nano".format(new_balance)
-                    yield self.stream.write(return_string.encode('ascii'))
-
-                elif split_data[0] == "rates":
-                    print("Nano Rates")
-                    return_string = "Rates {}".format("0")
                     yield self.stream.write(return_string.encode('ascii'))
 
         except tornado.iostream.StreamClosedError:
@@ -177,7 +175,8 @@ def check_account(account, wallet_seed, index):
         nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
-    print("Starting Nanoquake2")
+    print("Starting Nanoquake2...")
+    print()
 
     parser = ConfigParser()
     config_files = parser.read('config.ini')
@@ -219,6 +218,7 @@ def main():
         seed = wallet_seed
 
     else:
+        print()
         print("Config file found")
         print("Decoding wallet seed with your password")
         try:
@@ -235,18 +235,28 @@ def main():
         current_balance = float(nano.get_balance(previous)) / raw_in_xrb
     else:
         current_balance = 0
+    r = nano.get_rates()
+    print()
+    print("This is your game account address: {}".format(account))
+    print("Your balance is {} Nano".format(current_balance))
+    print()
+    print("NANO Rates")
+    print("- $:",r.json()['NANO']['USD'])
+    print("- £:",r.json()['NANO']['GBP'])
+    print("- €:",r.json()['NANO']['EUR'])
 
-    print("This is your game account address: {}, your balance is {} Nano".format(account, current_balance))
-
+ 
 
     while True:
+        print()
         print("Nanoquake Menu")
         print("1. Start the Game")
         print("2. TopUp Your Game Balance")
         print("3. Withdraw Funds")
         print("4. Display Seed")
         print("5. Exit")
-        
+        print()
+
         menu1 = 0
         try:
             menu1 = int(input("Please select an option: "))
@@ -333,7 +343,7 @@ def main():
             # infinite loop
             tornado.ioloop.IOLoop.instance().start()
         else:
-            print("Error, incorret option selected")
+            print("Error, incorrect option selected")
             sys.exit()
 
 if __name__ == "__main__":
