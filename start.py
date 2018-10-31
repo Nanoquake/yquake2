@@ -22,6 +22,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 def display_qr(account):
     data = 'xrb:' + account
     print(data)
+    print("Remember to close the QR code window after scanning")
     xrb_qr = pyqrcode.create(data)
     code_xbm = xrb_qr.xbm(scale=4)
     top = tkinter.Tk()
