@@ -20,9 +20,10 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 #    print(xrb_qr.terminal())
 
 def display_qr(account):
-    data = 'account address:' + account
-    print(data)
-    print("Close QR code window when ready...")
+    data = 'xrb:' + account
+    print('Account Address: ' + account)
+    print()
+    print("Close NanoQuake Wallet QR code window when ready...")
     xrb_qr = pyqrcode.create(data)
     code_xbm = xrb_qr.xbm(scale=4)
     top = tkinter.Tk()
@@ -314,7 +315,7 @@ def main():
                     nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
-                print("Your balance is {} Nano".format(current_balance))
+                print("Your balance is {} Nano".format(float(current_balance) / raw_in_xrb))
 
         elif menu1 == 1:
             previous = nano.get_previous(str(account))
