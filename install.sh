@@ -21,4 +21,8 @@ cd Install/Data/baseq2
 cp pak0.pak ../../../release/baseq2/
 cp -a players ../../../release/baseq2/
 cd ../../../
+
+cd nanoquake_theme_mod/
+cp pak16.pak ../release/baseq2/
+cd ../
 echo "Installation Complete"
