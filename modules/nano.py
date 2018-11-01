@@ -7,6 +7,8 @@ from pyblake2 import blake2b
 from nano25519 import ed25519_oop as ed25519
 import ctypes, requests
 
+representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
+
 def private_public(private):
     return ed25519.SigningKey(private).get_verifying_key().to_bytes()
 
@@ -157,7 +159,7 @@ def receive_xrb(index, account, wallet_seed):
 
     finished_block = '{ "type" : "state", "previous" : "%s", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % \
-    (previous, account, account, new_balance, block_hash, work, signature)
+    (previous, representative, account, new_balance, block_hash, work, signature)
 
     #print(finished_block)
 
@@ -191,7 +193,6 @@ def get_rates():
 
 def open_xrb(index, account, wallet_seed):
     ws = create_connection('ws://yapraiwallet.space:8000')
-    representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
     # Get pending blocks
 
     rx_data = get_pending(str(account))
@@ -227,7 +228,7 @@ def open_xrb(index, account, wallet_seed):
     signature = str(binascii.hexlify(sig), 'ascii')
 
     finished_block = '{ "type" : "state", "previous" : "0000000000000000000000000000000000000000000000000000000000000000", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
-            "work" : "%s", "signature" : "%s" }' % (account, account, balance, block_hash, work, signature)
+            "work" : "%s", "signature" : "%s" }' % (account, representative, balance, block_hash, work, signature)
 
     #print(finished_block)
 
@@ -243,8 +244,6 @@ def open_xrb(index, account, wallet_seed):
 
 def send_xrb(dest_account, amount, account, index, wallet_seed):
     ws = create_connection('ws://yapraiwallet.space:8000')
-
-    representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
 
     previous = get_previous(str(account))
 
@@ -278,7 +277,7 @@ def send_xrb(dest_account, amount, account, index, wallet_seed):
 
     finished_block = '{ "type" : "state", "previous" : "%s", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % (
-    previous, account, account, new_balance, dest_account, work, signature)
+    previous, representative, account, new_balance, dest_account, work, signature)
 
     #print(finished_block)
 
