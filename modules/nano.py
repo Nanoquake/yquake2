@@ -3,7 +3,7 @@ from websocket import create_connection
 
 import binascii
 from bitstring import BitArray
-from pyblake2 import blake2b
+from hashlib import blake2b
 from nano25519 import ed25519_oop as ed25519
 import ctypes, requests
 
@@ -159,7 +159,7 @@ def receive_xrb(index, account, wallet_seed):
 
     finished_block = '{ "type" : "state", "previous" : "%s", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % \
-    (previous, representative, account, new_balance, block_hash, work, signature)
+    (previous, account, account, new_balance, block_hash, work, signature)
 
     #print(finished_block)
 
@@ -228,7 +228,7 @@ def open_xrb(index, account, wallet_seed):
     signature = str(binascii.hexlify(sig), 'ascii')
 
     finished_block = '{ "type" : "state", "previous" : "0000000000000000000000000000000000000000000000000000000000000000", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
-            "work" : "%s", "signature" : "%s" }' % (account, representative, balance, block_hash, work, signature)
+            "work" : "%s", "signature" : "%s" }' % (account, account, balance, block_hash, work, signature)
 
     #print(finished_block)
 
@@ -277,7 +277,7 @@ def send_xrb(dest_account, amount, account, index, wallet_seed):
 
     finished_block = '{ "type" : "state", "previous" : "%s", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % (
-    previous, representative, account, new_balance, dest_account, work, signature)
+    previous, account, account, new_balance, dest_account, work, signature)
 
     #print(finished_block)
 
