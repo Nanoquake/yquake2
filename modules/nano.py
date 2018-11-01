@@ -352,7 +352,7 @@ def get_balance(hash):
     ws.close()
 
     rx_data = json.loads(str(block))
-    if len(rx_data) == 0:
+    if "error" in rx_data:
         return ""
     else:
         new_rx = json.loads(str(rx_data['contents']))

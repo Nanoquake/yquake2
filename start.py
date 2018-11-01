@@ -117,8 +117,17 @@ class SimpleTcpClient(object):
                     print("Pay Nano to Server")
                     dest_account = 'xrb_' + split_data[1]
                     amount = str(server_payin)
-                    previous = nano.get_previous(self.account)
-                    current_balance = nano.get_balance(previous)
+                    current_balance = 'Empty'
+                    try:
+                        previous = nano.get_previous(self.account)
+                        current_balance = nano.get_balance(previous)
+                    except:
+                        pass
+
+                    if current_balance == 'Empty' or current_balance == '':
+                        return_string = "Error empty balance"
+                        yield self.stream.write(return_string.encode('ascii'))
+
                     if int(current_balance) >= server_payin:
                         return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
                         return_string = "Block: {}".format(return_block)
@@ -138,10 +147,12 @@ class SimpleTcpClient(object):
                         new_balance = float(current_balance) / raw_in_xrb
                     except:
                         pass
-                    print("Balance: {}".format(new_balance))
-                    print("- $:",r.json()['NANO']['USD']*new_balance)
-                    print("- £:",r.json()['NANO']['GBP']*new_balance)
-                    print("- €:",r.json()['NANO']['EUR']*new_balance)
+                    if new_balance != 'Empty':
+                        print("Balance: {}".format(new_balance))
+                        print("- $:",r.json()['NANO']['USD']*new_balance)
+                        print("- £:",r.json()['NANO']['GBP']*new_balance)
+                        print("- €:",r.json()['NANO']['EUR']*new_balance)
+
                     return_string = "{} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
