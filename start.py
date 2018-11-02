@@ -8,6 +8,7 @@ import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
+from decimal import Decimal
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -44,6 +45,9 @@ def wait_for_reply(account):
        print('.', end='', flush=True)
 
     print()
+
+def print_decimal(float_number):
+    return float_number
 
 def read_encrypted(password, filename, string=True):
     with open(filename, 'rb') as input:
@@ -144,16 +148,16 @@ class SimpleTcpClient(object):
                         r = nano.get_rates()
                         previous = nano.get_previous(self.account)
                         current_balance = nano.get_balance(previous)
-                        new_balance = float(current_balance) / raw_in_xrb
+                        new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
                     if new_balance != 'Empty':
-                        print("Balance: {}".format(new_balance))
-                        print("- $:",r.json()['NANO']['USD']*new_balance)
-                        print("- £:",r.json()['NANO']['GBP']*new_balance)
-                        print("- €:",r.json()['NANO']['EUR']*new_balance)
+                        print("Balance: {:.3}".format(new_balance))
+                        print("- $:",Decimal(r.json()['NANO']['USD'])*new_balance)
+                        print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
+                        print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
 
-                    return_string = "{} Nano".format(new_balance)
+                    return_string = "{:.3} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
         except tornado.iostream.StreamClosedError:
@@ -245,13 +249,13 @@ def main():
 
     previous = nano.get_previous(str(account))
     if previous != "":
-        current_balance = float(nano.get_balance(previous)) / raw_in_xrb
+        current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
     else:
         current_balance = 0
     r = nano.get_rates()
     print()
     print("This is your game account address: {}".format(account))
-    print("Your balance is {} Nano".format(current_balance))
+    print("Your balance is {:.3} Nano".format(print_decimal(current_balance)))
     print()
     print("NANO Rates")
     print("- $:",r.json()['NANO']['USD'])
@@ -326,7 +330,7 @@ def main():
                     nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
-                print("Your balance is {} Nano".format(float(current_balance) / raw_in_xrb))
+                print("Your balance is {:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 1:
             previous = nano.get_previous(str(account))
