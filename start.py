@@ -248,14 +248,17 @@ def main():
     index = int(parser.get('wallet', 'index'))
 
     previous = nano.get_previous(str(account))
-    if previous != "":
-        current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
-    else:
-        current_balance = 0
-    r = nano.get_rates()
     print()
     print("This is your game account address: {}".format(account))
-    print("Your balance is {:.3} Nano".format(print_decimal(current_balance)))
+
+    if previous != "":
+        current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
+        print("Your balance is {:.3} Nano".format(print_decimal(current_balance)))
+    else:
+        current_balance = 0
+        print("Your balance is 0 Nano")
+    r = nano.get_rates()
+
     print()
     print("NANO Rates")
     print("- $:",r.json()['NANO']['USD'])
