@@ -4,7 +4,7 @@ from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
-import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
+import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform, os
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
@@ -160,6 +160,10 @@ class SimpleTcpClient(object):
                     return_string = "{:.3} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
+                elif split_data[0] == "nano_address":
+                    return_string = "{}".format(self.account[4:])
+                    yield self.stream.write(return_string.encode('ascii'))
+
         except tornado.iostream.StreamClosedError:
                 pass
 
@@ -240,13 +244,17 @@ def main():
         print("Decoding wallet seed with your password")
         try:
             wallet_seed = read_encrypted(password, 'seed.txt', string=True)
+            priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
+            public_key = str(binascii.hexlify(pub_key), 'ascii')
+            print("Public Key: ", str(public_key))
+        
+            account = nano.account_xrb(str(public_key))
+            print("Account Address: ", account)
         except:
             print('\nError decoding seed, check password and try again')
             sys.exit()
 
-    account = parser.get('wallet', 'account')
-    index = int(parser.get('wallet', 'index'))
-
+    index = 0
     previous = nano.get_previous(str(account))
     print()
     print("This is your game account address: {}".format(account))
@@ -339,9 +347,16 @@ def main():
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
             
+            #try:
+            current_dir = os.getcwd()
+            print(current_dir)
+            #os.remove('~/.yq2/baseq2/config.cfg')
+                #except OSError:
+                #    pass
+
             print("Starting Quake2")
             #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
-            game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
+            game_args = "+set vid_fullscreen 0 &"
             print(game_args)
             if platform.system() == 'Windows':
                 full_command = "start quake2 " + game_args
