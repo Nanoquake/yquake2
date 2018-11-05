@@ -38,13 +38,22 @@ def display_qr(account):
     top.mainloop()
 
 def wait_for_reply(account):
+    counter = 0
     pending = nano.get_pending(str(account))
-    while len(pending) == 0:
-       pending = nano.get_pending(str(account))
-       time.sleep(2)
-       print('.', end='', flush=True)
-
-    print()
+    while True:
+        counter = counter + 1
+        if counter == 30:
+            print("Waited 1 minute... Going back to menu, please check if transaction went through...")
+            break
+        else:
+            if len(pending) == 0:
+                pending = nano.get_pending(str(account))
+                print('.', end='', flush=True)
+                time.sleep(2)
+            else:
+                print()
+                print("Pending transaction detected")
+                break
 
 def print_decimal(float_number):
     return float_number
@@ -192,7 +201,6 @@ def check_account(account, wallet_seed, index):
     
     while len(pending) > 0:
         pending = nano.get_pending(str(account))
-        print(len(pending))
         nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
@@ -282,7 +290,8 @@ def main():
         print("2. TopUp Your Game Balance")
         print("3. Withdraw Funds")
         print("4. Display Seed")
-        print("5. Exit")
+        print("5. Check Balance")
+        print("6. Exit")
         print()
 
         menu1 = 0
@@ -291,9 +300,13 @@ def main():
         except:
             pass
 
-        if menu1 == 5:
+        if menu1 == 6:
             print("Exiting Nanoquake")
             sys.exit()
+
+        elif menu1 == 5:
+             current_balance = nano.get_balance(previous)
+             print("\nBalance: {}\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 4:
              print("\nSeed: {}\n".format(wallet_seed))
@@ -318,8 +331,7 @@ def main():
             # Process any pending blocks
             while len(pending) > 0:
                 pending = nano.get_pending(str(account))
-                print(len(pending))
-                if len(previous == 0):
+                if len(previous) == 0:
                     print("Opening Account")
                     nano.open_xrb(int(index), account, wallet_seed)
                     #We get previous after opening the account to switch it to receive rather than open
@@ -328,10 +340,11 @@ def main():
                 else:
                     print("Transaction Found - processing")
                     nano.receive_xrb(int(index), account, wallet_seed)
-            
+                    time.sleep(2) #give it chance so we down display message twice
+
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
-            while int(current_balance) < server_payin:
+            if int(current_balance) < server_payin:
                 print("Insufficient funds - please deposit at least 0.1 Nano")
             else:
                 print("Sufficient Funds - Lets Go!")
