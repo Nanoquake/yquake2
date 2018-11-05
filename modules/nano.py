@@ -3,9 +3,11 @@ from websocket import create_connection
 
 import binascii
 from bitstring import BitArray
-from pyblake2 import blake2b
+from hashlib import blake2b
 from nano25519 import ed25519_oop as ed25519
 import ctypes, requests
+
+representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
 
 def private_public(private):
     return ed25519.SigningKey(private).get_verifying_key().to_bytes()
@@ -191,7 +193,6 @@ def get_rates():
 
 def open_xrb(index, account, wallet_seed):
     ws = create_connection('ws://yapraiwallet.space:8000')
-    representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
     # Get pending blocks
 
     rx_data = get_pending(str(account))
@@ -243,8 +244,6 @@ def open_xrb(index, account, wallet_seed):
 
 def send_xrb(dest_account, amount, account, index, wallet_seed):
     ws = create_connection('ws://yapraiwallet.space:8000')
-
-    representative = 'xrb_1kd4h9nqaxengni43xy9775gcag8ptw8ddjifnm77qes1efuoqikoqy5sjq3'
 
     previous = get_previous(str(account))
 
@@ -353,7 +352,7 @@ def get_balance(hash):
     ws.close()
 
     rx_data = json.loads(str(block))
-    if len(rx_data) == 0:
+    if "error" in rx_data:
         return ""
     else:
         new_rx = json.loads(str(rx_data['contents']))

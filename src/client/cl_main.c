@@ -595,6 +595,63 @@ CL_NanoBalance_f(void)
 #endif
 }
 
+void
+CL_NanoAddress_f(void)
+{
+#ifdef __WIN32__
+    WORD versionWanted = MAKEWORD(1, 1);
+    WSADATA wsaData;
+    WSAStartup(versionWanted, &wsaData);
+#endif
+    //Com_Printf("Getting Your Nano Balance\n");
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        Com_Printf("[nano]: Socket creation error \n");
+        return;
+    }
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+    {
+        Com_Printf("[nano]: Invalid address/ Address not supported \n");
+        return;
+    }
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        Com_Printf("[nano]: Connection Failed \n");
+        return;
+    }
+    char buffer[128];
+    sprintf(buffer, "nano_address,0\n");
+    send(sock , buffer , strlen(buffer) , 0 );
+    
+    char server_reply[64];
+    
+    if( recv(sock , server_reply , 64 , 0) < 0)
+    {
+        Com_Printf("[nano]: Nano Address Failed \n");
+        return;
+    }
+    //int numbytes = recv(sock , server_reply , 1023 , 0);
+    
+    char new_nano_address[60];
+    memcpy(new_nano_address, server_reply, 60);
+    Com_Printf("Nano Address: %s-\n", new_nano_address);
+    Cvar_Set("nano_address", new_nano_address);
+    
+#ifdef __WIN32__
+    /* winsock requires a special function for sockets */
+    shutdown(sock, SD_BOTH);
+    closesocket(sock);
+    /* clean up winsock */
+    WSACleanup();
+#else
+    close(sock);
+#endif
+}
+
 /*
  * Restart the sound subsystem so it can pick up
  * new parameters and flush all sounds
@@ -701,7 +758,6 @@ CL_InitLocal(void)
 
 	/* userinfo */
 	name = Cvar_Get("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
-	nano_address = Cvar_Get("nano_address", "noaddress", CVAR_USERINFO | CVAR_ARCHIVE);
 	skin = Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
 	rate = Cvar_Get("rate", "8000", CVAR_USERINFO | CVAR_ARCHIVE);
 	msg = Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
@@ -725,8 +781,8 @@ CL_InitLocal(void)
 	Cmd_AddCommand("pingservers", CL_PingServers_f);
 	Cmd_AddCommand("skins", CL_Skins_f);
     
-        Cmd_AddCommand("pay_nano", CL_PayNano_f);
-        Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
+    Cmd_AddCommand("pay_nano", CL_PayNano_f);
+    Cmd_AddCommand("nano_balance", CL_NanoBalance_f);
     Cmd_AddCommand("nano_rates", CL_NanoRates_f);
     
 
@@ -776,6 +832,10 @@ CL_InitLocal(void)
 	Cmd_AddCommand("invdrop", NULL);
 	Cmd_AddCommand("weapnext", NULL);
 	Cmd_AddCommand("weapprev", NULL);
+    
+    CL_NanoAddress_f();
+    
+    nano_address = Cvar_Get("nano_address", "noaddress", CVAR_USERINFO | CVAR_ARCHIVE);
 }
 
 /*

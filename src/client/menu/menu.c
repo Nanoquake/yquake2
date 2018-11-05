@@ -1118,19 +1118,6 @@ ControlsSetMenuItemValues(void)
     s_options_oggshuffle_box.curvalue = (Cvar_VariableValue("ogg_shuffle") != 0);
     s_options_oggvolume_slider.curvalue = Cvar_VariableValue("ogg_volume") * 10;
     s_options_oggenable_box.curvalue = (Cvar_VariableValue("ogg_enable") != 0);
-
-    cvar_t *ogg;
-    ogg = Cvar_Get("ogg_sequence", "loop", CVAR_ARCHIVE);
-
-    if (!strcmp(ogg->string, "random"))
-    {
-        s_options_oggshuffle_box.curvalue = 1;
-    }
-    else
-    {
-        s_options_oggshuffle_box.curvalue = 0;
-    }
-
     s_options_quality_list.curvalue = (Cvar_VariableValue("s_loadas8bit") == 0);
     s_options_sensitivity_slider.curvalue = sensitivity->value * 2;
     s_options_alwaysrun_box.curvalue = (cl_run->value != 0);
@@ -3411,7 +3398,7 @@ DMOptions_MenuInit(void)
     Menu_AddItem(&s_dmoptions_menu, &s_quad_drop_box);
     Menu_AddItem(&s_dmoptions_menu, &s_friendlyfire_box);
 
-    if (M_IsGame("rogueg"))
+    if (M_IsGame("rogue"))
     {
         Menu_AddItem(&s_dmoptions_menu, &s_no_mines_box);
         Menu_AddItem(&s_dmoptions_menu, &s_no_nukes_box);

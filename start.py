@@ -4,10 +4,11 @@ from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
-import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform
+import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform, os
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
+from decimal import Decimal
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -44,6 +45,9 @@ def wait_for_reply(account):
        print('.', end='', flush=True)
 
     print()
+
+def print_decimal(float_number):
+    return float_number
 
 def read_encrypted(password, filename, string=True):
     with open(filename, 'rb') as input:
@@ -117,8 +121,17 @@ class SimpleTcpClient(object):
                     print("Pay Nano to Server")
                     dest_account = 'xrb_' + split_data[1]
                     amount = str(server_payin)
-                    previous = nano.get_previous(self.account)
-                    current_balance = nano.get_balance(previous)
+                    current_balance = 'Empty'
+                    try:
+                        previous = nano.get_previous(self.account)
+                        current_balance = nano.get_balance(previous)
+                    except:
+                        pass
+
+                    if current_balance == 'Empty' or current_balance == '':
+                        return_string = "Error empty balance"
+                        yield self.stream.write(return_string.encode('ascii'))
+
                     if int(current_balance) >= server_payin:
                         return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
                         return_string = "Block: {}".format(return_block)
@@ -135,14 +148,20 @@ class SimpleTcpClient(object):
                         r = nano.get_rates()
                         previous = nano.get_previous(self.account)
                         current_balance = nano.get_balance(previous)
-                        new_balance = float(current_balance) / raw_in_xrb
+                        new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
-                    print("Balance: {}".format(new_balance))
-                    print("- $:",r.json()['NANO']['USD']*new_balance)
-                    print("- £:",r.json()['NANO']['GBP']*new_balance)
-                    print("- €:",r.json()['NANO']['EUR']*new_balance)
-                    return_string = "{} Nano".format(new_balance)
+                    if new_balance != 'Empty':
+                        print("Balance: {:.3}".format(new_balance))
+                        print("- $:",Decimal(r.json()['NANO']['USD'])*new_balance)
+                        print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
+                        print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
+
+                    return_string = "{:.3} Nano".format(new_balance)
+                    yield self.stream.write(return_string.encode('ascii'))
+
+                elif split_data[0] == "nano_address":
+                    return_string = "{}".format(self.account[4:])
                     yield self.stream.write(return_string.encode('ascii'))
 
         except tornado.iostream.StreamClosedError:
@@ -225,22 +244,29 @@ def main():
         print("Decoding wallet seed with your password")
         try:
             wallet_seed = read_encrypted(password, 'seed.txt', string=True)
+            priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
+            public_key = str(binascii.hexlify(pub_key), 'ascii')
+            print("Public Key: ", str(public_key))
+        
+            account = nano.account_xrb(str(public_key))
+            print("Account Address: ", account)
         except:
             print('\nError decoding seed, check password and try again')
             sys.exit()
 
-    account = parser.get('wallet', 'account')
-    index = int(parser.get('wallet', 'index'))
-
+    index = 0
     previous = nano.get_previous(str(account))
-    if previous != "":
-        current_balance = float(nano.get_balance(previous)) / raw_in_xrb
-    else:
-        current_balance = 0
-    r = nano.get_rates()
     print()
     print("This is your game account address: {}".format(account))
-    print("Your balance is {} Nano".format(current_balance))
+
+    if previous != "":
+        current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
+        print("Your balance is {:.3} Nano".format(print_decimal(current_balance)))
+    else:
+        current_balance = 0
+        print("Your balance is 0 Nano")
+    r = nano.get_rates()
+
     print()
     print("NANO Rates")
     print("- $:",r.json()['NANO']['USD'])
@@ -283,47 +309,48 @@ def main():
             display_qr(account)
             previous = nano.get_previous(str(account))
             pending = nano.get_pending(str(account))
-            #print(previous)
 
-            if (len(previous) == 0) and (len(pending) == 0):
-                print("Please send at least 0.1 Nano to this account")
+            #Scan for new blocks, wait for pending
+            if len(pending) == 0:
                 print("Waiting for funds...")
                 wait_for_reply(account)
-
-            pending = nano.get_pending(str(account))
-            if (len(previous) == 0) and (len(pending) > 0):
-                print("Opening Account")
-                nano.open_xrb(int(index), account, wallet_seed)
-
-            #print("Rx Pending: ", pending)
-            pending = nano.get_pending(str(account))
-            #print("Pending Len:" + str(len(pending)))
-
+            
+            # Process any pending blocks
             while len(pending) > 0:
                 pending = nano.get_pending(str(account))
                 print(len(pending))
-                nano.receive_xrb(int(index), account, wallet_seed)
+                if len(previous == 0):
+                    print("Opening Account")
+                    nano.open_xrb(int(index), account, wallet_seed)
+                    #We get previous after opening the account to switch it to receive rather than open
+                    time.sleep(2) #Just to make sure that the block as been recorded
+                    previous = nano.get_previous(str(account))
+                else:
+                    print("Transaction Found - processing")
+                    nano.receive_xrb(int(index), account, wallet_seed)
             
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
             while int(current_balance) < server_payin:
                 print("Insufficient funds - please deposit at least 0.1 Nano")
-                wait_for_reply(account)
-                while len(pending) > 0:
-                    pending = nano.get_pending(str(account))
-                    print(len(pending))
-                    nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
-                print("Your balance is {} Nano".format(float(current_balance) / raw_in_xrb))
+                print("Your balance is {:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 1:
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
             
+            #try:
+            current_dir = os.getcwd()
+            print(current_dir)
+            #os.remove('~/.yq2/baseq2/config.cfg')
+                #except OSError:
+                #    pass
+
             print("Starting Quake2")
             #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
-            game_args = "+set nano_address {} +set vid_fullscreen 0 &".format(account[4:])
+            game_args = "+set vid_fullscreen 0 &"
             print(game_args)
             if platform.system() == 'Windows':
                 full_command = "start quake2 " + game_args
