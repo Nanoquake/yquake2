@@ -189,7 +189,7 @@ def main():
         if password == password_confirm and len(password) == 8:
             break
         if len(password) != 8:
-            print("Please enter a password of 8 characters (due to the use of DES to encrypt)")
+            print("Please enter a password of EXACTLY 8 characters (due to the use of DES to encrypt)")
         else:
             print("Password Mismatch!")
 
