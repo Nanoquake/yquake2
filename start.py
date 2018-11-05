@@ -43,7 +43,7 @@ def wait_for_reply(account):
     while True:
         counter = counter + 1
         if counter == 30:
-            print("Waited 1 minute... Going back to menu, please check if transaction went through...")
+            print("\nWaited 1 minute... Going back to menu, please check if transaction went through...")
             break
         else:
             if len(pending) == 0:
@@ -51,8 +51,7 @@ def wait_for_reply(account):
                 print('.', end='', flush=True)
                 time.sleep(2)
             else:
-                print()
-                print("Pending transaction detected")
+                print("\nPending transaction detected")
                 break
 
 def print_decimal(float_number):
@@ -306,7 +305,7 @@ def main():
 
         elif menu1 == 5:
              current_balance = nano.get_balance(previous)
-             print("\nBalance: {}\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+             print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 4:
              print("\nSeed: {}\n".format(wallet_seed))
