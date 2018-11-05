@@ -309,36 +309,30 @@ def main():
             display_qr(account)
             previous = nano.get_previous(str(account))
             pending = nano.get_pending(str(account))
-            #print(previous)
 
-            if (len(previous) == 0) and (len(pending) == 0):
-                print("Please send at least 0.1 Nano to this account")
+            #Scan for new blocks, wait for pending
+            if len(pending) == 0:
                 print("Waiting for funds...")
                 wait_for_reply(account)
-
-            pending = nano.get_pending(str(account))
-            if (len(previous) == 0) and (len(pending) > 0):
-                print("Opening Account")
-                nano.open_xrb(int(index), account, wallet_seed)
-
-            #print("Rx Pending: ", pending)
-            pending = nano.get_pending(str(account))
-            #print("Pending Len:" + str(len(pending)))
-
+            
+            # Process any pending blocks
             while len(pending) > 0:
                 pending = nano.get_pending(str(account))
                 print(len(pending))
-                nano.receive_xrb(int(index), account, wallet_seed)
+                if len(previous == 0):
+                    print("Opening Account")
+                    nano.open_xrb(int(index), account, wallet_seed)
+                    #We get previous after opening the account to switch it to receive rather than open
+                    time.sleep(2) #Just to make sure that the block as been recorded
+                    previous = nano.get_previous(str(account))
+                else:
+                    print("Transaction Found - processing")
+                    nano.receive_xrb(int(index), account, wallet_seed)
             
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
             while int(current_balance) < server_payin:
                 print("Insufficient funds - please deposit at least 0.1 Nano")
-                wait_for_reply(account)
-                while len(pending) > 0:
-                    pending = nano.get_pending(str(account))
-                    print(len(pending))
-                    nano.receive_xrb(int(index), account, wallet_seed)
             else:
                 print("Sufficient Funds - Lets Go!")
                 print("Your balance is {:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
