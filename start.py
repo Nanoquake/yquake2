@@ -24,7 +24,7 @@ def display_qr(account):
     data = 'xrb:' + account
     print('Account Address: ' + account)
     print()
-    print("Close NanoQuake Wallet QR code window when ready...")
+    print("Close NanoQuake Wallet QR code window when ready to process transactions...")
     xrb_qr = pyqrcode.create(data)
     code_xbm = xrb_qr.xbm(scale=4)
     top = tkinter.Tk()
@@ -165,7 +165,7 @@ class SimpleTcpClient(object):
                         print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
                         print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
 
-                    return_string = "{:.3} Nano".format(new_balance)
+                    return_string = "{:.5} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
                 elif split_data[0] == "nano_address":
@@ -203,7 +203,7 @@ def check_account(account, wallet_seed, index):
         nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
-    print("Starting Nanoquake2...")
+    print("Starting NanoQuake2...")
     print()
 
     parser = ConfigParser()
@@ -268,7 +268,7 @@ def main():
 
     if previous != "":
         current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
-        print("Your balance is {:.3} Nano".format(print_decimal(current_balance)))
+        print("Your balance is {:.5} Nano".format(print_decimal(current_balance)))
     else:
         current_balance = 0
         print("Your balance is 0 Nano")
@@ -284,9 +284,11 @@ def main():
 
     while True:
         print()
-        print("Nanoquake Menu")
-        print("1. Start the Game")
-        print("2. TopUp Your Game Balance")
+        print("--------------")
+        print("NanoQuake Menu")
+        print("--------------")
+        print("1. Start Game - Lets Get REKT...")
+        print("2. Top-up Game Balance")
         print("3. Withdraw Funds")
         print("4. Display Seed")
         print("5. Check Balance")
@@ -300,11 +302,22 @@ def main():
             pass
 
         if menu1 == 6:
-            print("Exiting Nanoquake")
+            print("Exiting NanoQuake")
             sys.exit()
 
         elif menu1 == 5:
+             previous = nano.get_previous(str(account))
              current_balance = nano.get_balance(previous)
+             if int(current_balance) < server_payin:
+                print()
+                print("Insufficient funds - please deposit at least 0.1 Nano")
+                print("{} Raw Detected...".format(current_balance))
+                #Scan for new blocks, wait for pending
+             pending = nano.get_pending(str(account))
+             if len(pending) > 0:
+                print()
+                print("This account has pending transactions. Follow option 2 to process...".format(current_balance))
+
              print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 4:
@@ -328,6 +341,11 @@ def main():
                 wait_for_reply(account)
             
             # Process any pending blocks
+            pending = nano.get_pending(str(account))
+            
+            if len(pending) > 0:
+                print("Processing...")
+
             while len(pending) > 0:
                 pending = nano.get_pending(str(account))
                 if len(previous) == 0:
@@ -337,17 +355,20 @@ def main():
                     time.sleep(2) #Just to make sure that the block as been recorded
                     previous = nano.get_previous(str(account))
                 else:
-                    print("Transaction Found - processing")
                     nano.receive_xrb(int(index), account, wallet_seed)
+                    print('.', end='', flush=True)
                     time.sleep(2) #give it chance so we down display message twice
 
             previous = nano.get_previous(str(account))
             current_balance = nano.get_balance(previous)
             if int(current_balance) < server_payin:
+                print()
                 print("Insufficient funds - please deposit at least 0.1 Nano")
+                print("({} Raw Detected)".format(current_balance))
             else:
+                print()
                 print("Sufficient Funds - Lets Go!")
-                print("Your balance is {:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+                print("Your balance is {:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 1:
             previous = nano.get_previous(str(account))
