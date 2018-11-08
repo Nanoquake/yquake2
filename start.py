@@ -399,7 +399,7 @@ def main():
             print("Listening on %s:%d..." % (HOST, PORT))
             
             #
-            pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 10000)
+            pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
             pc.start()
             
             # infinite loop
