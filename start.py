@@ -15,6 +15,8 @@ server_payin = 100000000000000000000000000000 #0.1Nano
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
+last_pay_time = 0
+
 #def display_qr(account):
 #    data = 'xrb:' + account
 #    xrb_qr = pyqrcode.create(data, encoding='iso-8859-1')
@@ -75,7 +77,7 @@ def write_encrypted(password, filename, plaintext):
 
 class SimpleTcpClient(object):
     client_id = 0
-    
+  
     def __init__(self, stream, account, wallet_seed, index):
         super().__init__()
         SimpleTcpClient.client_id += 1
@@ -127,27 +129,37 @@ class SimpleTcpClient(object):
                 
                 elif split_data[0] == "pay_server":
                     print("Pay Nano to Server")
+                    global last_pay_time
                     dest_account = 'xrb_' + split_data[1]
                     amount = str(server_payin)
                     current_balance = 'Empty'
-                    try:
-                        previous = nano.get_previous(self.account)
-                        current_balance = nano.get_balance(previous)
-                    except:
-                        pass
+                    time_difference = time.time() - last_pay_time
+                    print(time_difference)
+                    if time_difference > 30:
+                        try:
+                            previous = nano.get_previous(self.account)
+                            current_balance = nano.get_balance(previous)
+                        except:
+                            pass
 
-                    if current_balance == 'Empty' or current_balance == '':
-                        return_string = "Error empty balance"
-                        yield self.stream.write(return_string.encode('ascii'))
 
-                    if int(current_balance) >= server_payin:
-                        return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
-                        return_string = "Block: {}".format(return_block)
-                        yield self.stream.write(return_string.encode('ascii'))
+                        if current_balance == 'Empty' or current_balance == '':
+                            return_string = "Error empty balance"
+                            yield self.stream.write(return_string.encode('ascii'))
+                        if int(current_balance) >= server_payin:
+                            return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                            last_pay_time = time.time()
+                            return_string = "Block: {}".format(return_block)
+                            yield self.stream.write(return_string.encode('ascii'))
+                        else:
+                            print("Error - insufficient funds")
+                            return_string = "Error insufficent funds"
+                            yield self.stream.write(return_string.encode('ascii'))
                     else:
-                        print("Error - insufficient funds")
-                        return_string = "Error insufficent funds"
+                        print("Last pay in less that 30 seconds ago")
+                        return_string = "Last pay in less that 30 seconds ago"
                         yield self.stream.write(return_string.encode('ascii'))
+
 
                 elif split_data[0] == "balance":
                     print("Nano Balance")
