@@ -3,3 +3,13 @@
 *.mk
 *.user
 *.d
+
+# after installation
+Install/
+Modules/
+Splash/
+config.ini
+license.txt
+readme.txt
+seed.txt
+Setup.exe
