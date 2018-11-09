@@ -165,23 +165,26 @@ class SimpleTcpClient(object):
                     print("Nano Balance")
                     new_balance = 'Empty'
                     try:
-                        r = nano.get_rates()
                         previous = nano.get_previous(self.account)
                         current_balance = nano.get_balance(previous)
                         new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
-                    if new_balance != 'Empty':
-                        print("Balance: {:.3}".format(new_balance))
-                        print("- $:",Decimal(r.json()['NANO']['USD'])*new_balance)
-                        print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
-                        print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
-
+                    
                     return_string = "{:.5} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
                 elif split_data[0] == "nano_address":
                     return_string = "{}".format(self.account[4:])
+                    yield self.stream.write(return_string.encode('ascii'))
+
+                elif split_data[0] == "rates":
+                    try:
+                        r = nano.get_rates()
+                    except:
+                        pass 
+                    
+                    return_string = "USD:" + str(r.json()['NANO']['USD']) + " - GBP:" + str(r.json()['NANO']['GBP']) + " - EURO:" + str(r.json()['NANO']['EUR'])
                     yield self.stream.write(return_string.encode('ascii'))
 
         except tornado.iostream.StreamClosedError:
