@@ -329,6 +329,8 @@ def main():
         elif menu1 == 5:
              previous = nano.get_previous(str(account))
              current_balance = nano.get_balance(previous)
+             if current_balance == "":
+                current_balance = 0
              if int(current_balance) < server_payin:
                 print()
                 print("Insufficient funds - please deposit at least 0.1 Nano")
