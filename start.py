@@ -170,6 +170,12 @@ class SimpleTcpClient(object):
                         new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
+
+                    if new_balance != 'Empty':
+                        print("Balance: {:.3}".format(new_balance))
+                        #print("- $:",Decimal(r.json()['NANO']['USD'])*new_balance)
+                        #print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
+                        #print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
                     
                     return_string = "{:.5} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
