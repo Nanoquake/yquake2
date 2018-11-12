@@ -4,7 +4,7 @@ from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
-import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform, os
+import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform, os, threading
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
@@ -74,6 +74,9 @@ def write_encrypted(password, filename, plaintext):
         des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
         ciphertext = des.encrypt(plaintext.encode('utf-8'))
         output.write(ciphertext)
+
+def send_xrb_thread(dest_account, amount, account, index, wallet_seed):
+    return_block = nano.send_xrb(dest_account, amount, account, int(index), wallet_seed)
 
 class SimpleTcpClient(object):
     client_id = 0
@@ -147,9 +150,10 @@ class SimpleTcpClient(object):
                             return_string = "Error empty balance"
                             yield self.stream.write(return_string.encode('ascii'))
                         if int(current_balance) >= server_payin:
-                            return_block = nano.send_xrb(dest_account, int(amount), self.account, int(self.index), self.wallet_seed)
+                            t = threading.Thread(target=send_xrb_thread, args=(dest_account, int(amount), self.account, int(self.index), self.wallet_seed,))
+                            t.start()
                             last_pay_time = time.time()
-                            return_string = "Block: {}".format(return_block)
+                            return_string = "Payment Sent"
                             yield self.stream.write(return_string.encode('ascii'))
                         else:
                             print("Error - insufficient funds")
