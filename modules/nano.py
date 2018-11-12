@@ -358,6 +358,24 @@ def get_balance(hash):
         new_rx = json.loads(str(rx_data['contents']))
         return new_rx['balance']
 
+def get_account_balance(account):
+    # Get balance from hash
+    ws = create_connection('ws://yapraiwallet.space:8000')
+    data = json.dumps({'action': 'account_balance', 'account': account})
+    
+    ws.send(data)
+    
+    block = ws.recv()
+    #print("Received '%s'" % block)
+    ws.close()
+    
+    rx_data = json.loads(str(block))
+    print(rx_data)
+    if "error" in rx_data:
+        return ""
+    else:
+        #new_rx = json.loads(str(rx_data['contents']))
+        return rx_data['balance']
 
 def get_pending(account):
     # Get pending blocks

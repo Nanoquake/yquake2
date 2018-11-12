@@ -165,8 +165,8 @@ class SimpleTcpClient(object):
                     print("Nano Balance")
                     new_balance = 'Empty'
                     try:
-                        previous = nano.get_previous(self.account)
-                        current_balance = nano.get_balance(previous)
+                        current_balance = nano.get_account_balance(self.account)
+                        print(current_balance)
                         new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
