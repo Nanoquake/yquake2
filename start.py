@@ -234,9 +234,6 @@ def main():
     print("Starting NanoQuake2...")
     print()
 
-    parser = ConfigParser()
-    config_files = parser.read('config.ini')
-
     while True:
         password = prompt('Enter password: ', is_password=True)
         password_confirm = prompt('Confirm password: ', is_password=True)
@@ -247,15 +244,13 @@ def main():
         else:
             print("Password Mismatch!")
 
-    if len(config_files) == 0:
+    exists = os.path.isfile('seed.txt')
+    if exists == False:
         print("Generating Wallet Seed")
         full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
         wallet_seed = full_wallet_seed[2:].upper()
         print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
         write_encrypted(password, 'seed.txt', wallet_seed)
-
-        cfgfile = open("config.ini",'w')
-        parser.add_section('wallet')
 
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')
@@ -264,13 +259,6 @@ def main():
         account = nano.account_xrb(str(public_key))
         print("Account Address: ", account)
 
-        parser.set('wallet', 'account', account)
-        parser.set('wallet', 'index', '0')
-
-        parser.write(cfgfile)
-        cfgfile.close()
-
-        index = 0
         seed = wallet_seed
 
     else:
