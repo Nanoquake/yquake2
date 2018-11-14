@@ -64,6 +64,9 @@ def read_encrypted(password, filename, string=True):
         ciphertext = input.read()
         des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
         plaintext = des.decrypt(ciphertext)
+        if len(plaintext) != 64:
+            print("Error - empty seed, please delete your seed.txt and config.ini")
+            sys.exit()
         if string:
             return plaintext.decode('utf8')
         else:
