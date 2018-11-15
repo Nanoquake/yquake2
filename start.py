@@ -1,10 +1,9 @@
-from configparser import ConfigParser
 from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 import subprocess
 from prompt_toolkit import prompt
 from Crypto.Cipher import DES
-import binascii, time, io, pyqrcode, random, getpass, socket, sys, platform, os, threading
+import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
@@ -232,10 +231,16 @@ def check_account(account, wallet_seed, index):
 
 def main():
     print("Starting NanoQuake2...")
+    print("* Be aware that the encryption thats encrypts your wallet will be upgraded in the next version of NanoQuake - please ensure you backup your seed *")
     print()
 
+    exists = os.path.isfile('seed.txt')
+    
     while True:
-        password = prompt('Enter password: ', is_password=True)
+        if exists:
+            password = prompt('Enter password: ', is_password=True)
+        else:
+            password = prompt('Please enter a new password: ', is_password=True)
         password_confirm = prompt('Confirm password: ', is_password=True)
         if password == password_confirm and len(password) == 8:
             break
@@ -244,7 +249,7 @@ def main():
         else:
             print("Password Mismatch!")
 
-    exists = os.path.isfile('seed.txt')
+
     if exists == False:
         print("Generating Wallet Seed")
         full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
