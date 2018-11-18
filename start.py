@@ -62,7 +62,7 @@ def read_encrypted(password, filename, string=True):
         
         IV = 16 * '\x00'           # Initialization vector: this needs to be changed
         mode = AES.MODE_CBC
-        decryptor = AES.new(key, mode, IV=IV)
+        decryptor = AES.new(key, mode, IV=IV.encode("utf8"))
         
         ciphertext = input.read()
         plaintext = decryptor.decrypt(ciphertext)
@@ -82,7 +82,7 @@ def write_encrypted(password, filename, plaintext):
     with open(filename, 'wb') as output:
         IV = 16 * '\x00'           # Initialization vector: this needs to be changed
         mode = AES.MODE_CBC
-        encryptor = AES.new(key, mode, IV=IV)
+        encryptor = AES.new(key, mode, IV=IV.encode("utf8"))
 
         ciphertext = encryptor.encrypt(plaintext.encode('utf-8'))
         output.write(ciphertext)
@@ -287,7 +287,7 @@ def main():
             wallet_seed = imported_seed.upper()
         
         print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
-        write_encrypted(password.encode('UTF-8'), 'seedAES.txt', wallet_seed)
+        write_encrypted(password.encode('utf8'), 'seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')
         print("Public Key: ", str(public_key))
@@ -302,7 +302,7 @@ def main():
         print("Seed file found")
         print("Decoding wallet seed with your password")
         try:
-            wallet_seed = read_encrypted(password.encode('UTF-8'), 'seedAES.txt', string=True)
+            wallet_seed = read_encrypted(password.encode('utf8'), 'seedAES.txt', string=True)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
             print("Public Key: ", str(public_key))
