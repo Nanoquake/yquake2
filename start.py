@@ -1,8 +1,9 @@
 from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
+import hashlib
 import subprocess
 from prompt_toolkit import prompt
-from Crypto.Cipher import DES
+from Crypto.Cipher import AES
 import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
@@ -53,12 +54,20 @@ def wait_for_reply(account):
         counter = counter + 1
 
 def read_encrypted(password, filename, string=True):
+    #https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto
+    
+    key = hashlib.sha256(password).digest()
+    
     with open(filename, 'rb') as input:
+        
+        IV = 16 * '\x00'           # Initialization vector: this needs to be changed
+        mode = AES.MODE_CBC
+        decryptor = AES.new(key, mode, IV=IV)
+        
         ciphertext = input.read()
-        des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
-        plaintext = des.decrypt(ciphertext)
+        plaintext = decryptor.decrypt(ciphertext)
         if len(plaintext) != 64:
-            print("Error - empty seed, please delete your seed.txt and config.ini")
+            print("Error - empty seed, please delete your seedAES.txt and start again")
             sys.exit()
         if string:
             return plaintext.decode('utf8')
@@ -66,9 +75,16 @@ def read_encrypted(password, filename, string=True):
             return plaintext
 
 def write_encrypted(password, filename, plaintext):
+    #https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto
+    
+    key = hashlib.sha256(password).digest()
+    
     with open(filename, 'wb') as output:
-        des = DES.new(password.encode('utf-8'), DES.MODE_ECB)
-        ciphertext = des.encrypt(plaintext.encode('utf-8'))
+        IV = 16 * '\x00'           # Initialization vector: this needs to be changed
+        mode = AES.MODE_CBC
+        encryptor = AES.new(key, mode, IV=IV)
+
+        ciphertext = encryptor.encrypt(plaintext.encode('utf-8'))
         output.write(ciphertext)
 
 def send_xrb_thread(dest_account, amount, account, index, wallet_seed):
@@ -231,10 +247,14 @@ def check_account(account, wallet_seed, index):
 
 def main():
     print("Starting NanoQuake2...")
-    print("* Be aware that the encryption thats encrypts your wallet will be upgraded in the next version of NanoQuake - please ensure you backup your seed *")
+    print("* This version now uses AES not DES to encrypt your seed, if you are upgrading please import your old seed otherwise generate a new seed.*")
     print()
 
-    exists = os.path.isfile('seed.txt')
+    old_exists = os.path.isfile('seed.txt')
+    if old_exists == True:
+        print("Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script")
+    
+    exists = os.path.isfile('seedAES.txt')
     
     while True:
         if exists:
@@ -242,21 +262,32 @@ def main():
         else:
             password = prompt('Please enter a new password: ', is_password=True)
         password_confirm = prompt('Confirm password: ', is_password=True)
-        if password == password_confirm and len(password) == 8:
+        if password == password_confirm:
             break
-        if len(password) != 8:
-            print("Please enter a password of EXACTLY 8 characters (due to the use of DES to encrypt)")
         else:
             print("Password Mismatch!")
 
 
     if exists == False:
-        print("Generating Wallet Seed")
-        full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
-        wallet_seed = full_wallet_seed[2:].upper()
-        print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
-        write_encrypted(password, 'seed.txt', wallet_seed)
+        print()
+        print("1. Generate a new seed")
+        print("2. Import a seed")
+        
+        premenu = int(input("Please select an option: "))
+        
+        wallet_seed = None
+        
+        if premenu == 1:
+            print("Generating Wallet Seed")
+            full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
+            wallet_seed = full_wallet_seed[2:].upper()
 
+        elif premenu == 2:
+            imported_seed = input("Your wallet seed (64 chars): ")
+            wallet_seed = imported_seed.upper()
+        
+        print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
+        write_encrypted(password.encode('UTF-8'), 'seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')
         print("Public Key: ", str(public_key))
@@ -268,10 +299,10 @@ def main():
 
     else:
         print()
-        print("Config file found")
+        print("Seed file found")
         print("Decoding wallet seed with your password")
         try:
-            wallet_seed = read_encrypted(password, 'seed.txt', string=True)
+            wallet_seed = read_encrypted(password.encode('UTF-8'), 'seedAES.txt', string=True)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
             print("Public Key: ", str(public_key))
@@ -283,23 +314,20 @@ def main():
             sys.exit()
 
     index = 0
-    previous = nano.get_previous(str(account))
     print()
     print("This is your game account address: {}".format(account))
+    current_balance = nano.get_account_balance(account)
+    if current_balance != "timeout":
+        print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
-    if previous != "":
-        current_balance = Decimal(nano.get_account_balance(account)) / Decimal(raw_in_xrb)
-        print("Your balance is {:.5} Nano".format(current_balance))
-    else:
-        current_balance = 0
-        print("Your balance is 0 Nano")
     r = nano.get_rates()
+    if r != "timeout":
 
-    print()
-    print("NANO Rates")
-    print("- $:",r.json()['NANO']['USD'])
-    print("- £:",r.json()['NANO']['GBP'])
-    print("- €:",r.json()['NANO']['EUR'])
+        print()
+        print("NANO Rates")
+        print("- $:",r.json()['NANO']['USD'])
+        print("- £:",r.json()['NANO']['GBP'])
+        print("- €:",r.json()['NANO']['EUR'])
 
  
 
