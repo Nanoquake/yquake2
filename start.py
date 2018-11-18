@@ -142,8 +142,7 @@ class SimpleTcpClient(object):
                     print(time_difference)
                     if time_difference > 30:
                         try:
-                            previous = nano.get_previous(self.account)
-                            current_balance = nano.get_balance(previous)
+                            current_balance = nano.get_account_balance(self.account)
                         except:
                             pass
 
@@ -288,7 +287,7 @@ def main():
     print("This is your game account address: {}".format(account))
 
     if previous != "":
-        current_balance = Decimal(nano.get_balance(previous)) / Decimal(raw_in_xrb)
+        current_balance = Decimal(nano.get_account_balance(account)) / Decimal(raw_in_xrb)
         print("Your balance is {:.5} Nano".format(print_decimal(current_balance)))
     else:
         current_balance = 0
@@ -327,8 +326,7 @@ def main():
             sys.exit()
 
         elif menu1 == 5:
-             previous = nano.get_previous(str(account))
-             current_balance = nano.get_balance(previous)
+             current_balance = nano.get_account_balance(account)
              if current_balance == "":
                 current_balance = 0
              if int(current_balance) < server_payin:
@@ -349,8 +347,7 @@ def main():
         elif menu1 == 3:
             print("Withdraw Funds")
             withdraw_dest = input("Destination Address: ")
-            previous = nano.get_previous(str(account))
-            current_balance = nano.get_balance(previous)
+            current_balance = nano.get_account_balance(account)
             nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
 
         elif menu1 == 2:
@@ -382,8 +379,7 @@ def main():
                     print('.', end='', flush=True)
                     time.sleep(2) #give it chance so we down display message twice
 
-            previous = nano.get_previous(str(account))
-            current_balance = nano.get_balance(previous)
+            current_balance = nano.get_account_balance(account)
             if int(current_balance) < server_payin:
                 print()
                 print("Insufficient funds - please deposit at least 0.1 Nano")
@@ -394,8 +390,7 @@ def main():
                 print("Your balance is {:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 1:
-            previous = nano.get_previous(str(account))
-            current_balance = nano.get_balance(previous)
+            current_balance = nano.get_account_balance(account)
             
             #try:
             current_dir = os.getcwd()

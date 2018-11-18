@@ -1,5 +1,4 @@
 import time, json, random
-from websocket import create_connection
 
 import binascii
 from bitstring import BitArray
@@ -113,8 +112,6 @@ def seed_account(seed, index):
 
 
 def receive_xrb(index, account, wallet_seed):
-    ws = create_connection('ws://yapraiwallet.space:8000')
-
     # Get pending blocks
 
     rx_data = get_pending(str(account))
@@ -161,16 +158,8 @@ def receive_xrb(index, account, wallet_seed):
             "work" : "%s", "signature" : "%s" }' % \
     (previous, account, account, new_balance, block_hash, work, signature)
 
-    #print(finished_block)
-
-    data = json.dumps({'action': 'process', 'block': finished_block})
-    # print(data)
-    ws.send(data)
-
-    block_reply = ws.recv()
-
-    #print(block_reply)
-    ws.close()
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    block_reply = data.json()
     return str(balance)
 
 
@@ -192,7 +181,6 @@ def get_rates():
 
 
 def open_xrb(index, account, wallet_seed):
-    ws = create_connection('ws://yapraiwallet.space:8000')
     # Get pending blocks
 
     rx_data = get_pending(str(account))
@@ -229,21 +217,12 @@ def open_xrb(index, account, wallet_seed):
 
     finished_block = '{ "type" : "state", "previous" : "0000000000000000000000000000000000000000000000000000000000000000", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % (account, account, balance, block_hash, work, signature)
-
-    #print(finished_block)
-
-    data = json.dumps({'action': 'process', 'block': finished_block})
-    # print(data)
-    ws.send(data)
-
-    block_reply = ws.recv()
-
-    #print(block_reply)
-    ws.close()
+    
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    block_reply = data.json()
 
 
 def send_xrb(dest_account, amount, account, index, wallet_seed):
-    ws = create_connection('ws://yapraiwallet.space:8000')
 
     previous = get_previous(str(account))
 
@@ -279,26 +258,20 @@ def send_xrb(dest_account, amount, account, index, wallet_seed):
             "work" : "%s", "signature" : "%s" }' % (
     previous, account, account, new_balance, dest_account, work, signature)
 
-    #print(finished_block)
-
-    data = json.dumps({'action': 'process', 'block': finished_block})
-    # print(data)
-    ws.send(data)
-
-    block_reply = json.loads(str(ws.recv()))
-    
-    ws.close()
-
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    block_reply = data.json()
     return block_reply['hash']
 
 
 def get_pow(hash):
-    ws = create_connection('ws://yapraiwallet.space:8000')
-    data = json.dumps({'action': 'work_generate', 'hash': hash})
-    ws.send(data)
-    block_work = json.loads(str(ws.recv()))
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"work_generate", "hash" : hash})
+    #ws = create_connection('ws://yapraiwallet.space:8000')
+    #data = json.dumps({'action': 'work_generate', 'hash': hash})
+    #ws.send(data)
+    #block_work = json.loads(str(ws.recv()))
+    block_work = data.json()
     work = block_work['work']
-    ws.close()
+    #ws.close()
 
 #    work = ''
 #    while work == '' :
@@ -323,15 +296,9 @@ def get_pow(hash):
 def get_previous(account):
     # Get account info
     accounts_list = [account]
-    ws = create_connection('ws://yapraiwallet.space:8000')
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"accounts_frontiers", "accounts" : accounts_list})
 
-    data = json.dumps({'action': 'accounts_frontiers', 'accounts': accounts_list})
-    ws.send(data)
-    result = ws.recv()
-    #print(result)
-    account_info = json.loads(str(result))
-
-    ws.close()
+    account_info = data.json()
 
     if len(account_info['frontiers']) == 0:
         return ""
@@ -342,16 +309,9 @@ def get_previous(account):
 
 def get_balance(hash):
     # Get balance from hash
-    ws = create_connection('ws://yapraiwallet.space:8000')
-    data = json.dumps({'action': 'block', 'hash': hash})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"block", "hash" : hash})
 
-    ws.send(data)
-
-    block = ws.recv()
-    #print("Received '%s'" % block)
-    ws.close()
-
-    rx_data = json.loads(str(block))
+    rx_data = data.json()
     if "error" in rx_data:
         return ""
     else:
@@ -360,17 +320,10 @@ def get_balance(hash):
 
 def get_account_balance(account):
     # Get balance from hash
-    ws = create_connection('ws://yapraiwallet.space:8000')
-    data = json.dumps({'action': 'account_balance', 'account': account})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"account_balance", "account" : account})
     
-    ws.send(data)
-    
-    block = ws.recv()
-    #print("Received '%s'" % block)
-    ws.close()
-    
-    rx_data = json.loads(str(block))
-    print(rx_data)
+    rx_data = data.json()
+    #print(rx_data)
     if "error" in rx_data:
         return ""
     else:
@@ -378,16 +331,9 @@ def get_account_balance(account):
         return rx_data['balance']
 
 def get_pending(account):
-    # Get pending blocks
-    ws = create_connection('ws://yapraiwallet.space:8000')
-    data = json.dumps({'action': 'pending', 'account': account, 'count': '1', 'source': 'true'})
 
-    ws.send(data)
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"pending", "count" : "1", "account" : account, "source" : "true"})
 
-    pending_blocks = ws.recv()
-    #print("Received '%s'" % pending_blocks)
-
-    rx_data = json.loads(str(pending_blocks))
-    ws.close()
+    rx_data = data.json()
 
     return rx_data['blocks']
