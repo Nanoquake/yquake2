@@ -158,7 +158,7 @@ def receive_xrb(index, account, wallet_seed):
             "work" : "%s", "signature" : "%s" }' % \
     (previous, account, account, new_balance, block_hash, work, signature)
 
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block}, timeout=1)
     block_reply = data.json()
     return str(balance)
 
@@ -175,7 +175,7 @@ def get_address(index, wallet_seed):
     return account
 
 def get_rates():
-    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake')
+    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake', timeout=1)
     print("Querying CryptoCompare for fiat rates")
     return r
 
@@ -218,7 +218,7 @@ def open_xrb(index, account, wallet_seed):
     finished_block = '{ "type" : "state", "previous" : "0000000000000000000000000000000000000000000000000000000000000000", "representative" : "%s" , "account" : "%s", "balance" : "%s", "link" : "%s", \
             "work" : "%s", "signature" : "%s" }' % (account, account, balance, block_hash, work, signature)
     
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block}, timeout=1)
     block_reply = data.json()
 
 
@@ -258,13 +258,13 @@ def send_xrb(dest_account, amount, account, index, wallet_seed):
             "work" : "%s", "signature" : "%s" }' % (
     previous, account, account, new_balance, dest_account, work, signature)
 
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block}, timeout=1)
     block_reply = data.json()
     return block_reply['hash']
 
 
 def get_pow(hash):
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"work_generate", "hash" : hash})
+    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"work_generate", "hash" : hash}, timeout=10)
     #ws = create_connection('ws://yapraiwallet.space:8000')
     #data = json.dumps({'action': 'work_generate', 'hash': hash})
     #ws.send(data)
@@ -296,7 +296,11 @@ def get_pow(hash):
 def get_previous(account):
     # Get account info
     accounts_list = [account]
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"accounts_frontiers", "accounts" : accounts_list})
+    try:
+        data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"accounts_frontiers", "accounts" : accounts_list}, timeout=1)
+    except requests.exceptions.Timeout:
+        print("Error: Timeout")
+        return "timeout"
 
     account_info = data.json()
 
@@ -309,7 +313,11 @@ def get_previous(account):
 
 def get_balance(hash):
     # Get balance from hash
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"block", "hash" : hash})
+    try:
+        data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"block", "hash" : hash}, timeout=1)
+    except requests.exceptions.Timeout:
+        print("Error: Timeout")
+        return "timeout"
 
     rx_data = data.json()
     if "error" in rx_data:
@@ -320,8 +328,12 @@ def get_balance(hash):
 
 def get_account_balance(account):
     # Get balance from hash
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"account_balance", "account" : account})
-    
+    try:
+        data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"account_balance", "account" : account}, timeout=1)
+    except requests.exceptions.Timeout:
+        print("Error: Timeout")
+        return "timeout"
+
     rx_data = data.json()
     #print(rx_data)
     if "error" in rx_data:
@@ -331,8 +343,11 @@ def get_account_balance(account):
         return rx_data['balance']
 
 def get_pending(account):
-
-    data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"pending", "count" : "1", "account" : account, "source" : "true"})
+    try:
+        data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"pending", "count" : "1", "account" : account, "source" : "true"}, timeout=1)
+    except requests.exceptions.Timeout:
+        print("Error: Timeout")
+        return "timeout"
 
     rx_data = data.json()
 

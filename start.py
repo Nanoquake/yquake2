@@ -16,11 +16,6 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 last_pay_time = 0
 
-#def display_qr(account):
-#    data = 'xrb:' + account
-#    xrb_qr = pyqrcode.create(data, encoding='iso-8859-1')
-#    print(xrb_qr.terminal())
-
 def display_qr(account):
     data = 'xrb:' + account
     print('Account Address: ' + account)
@@ -40,23 +35,22 @@ def display_qr(account):
 
 def wait_for_reply(account):
     counter = 0
-    pending = nano.get_pending(str(account))
+    
     while True:
-        counter = counter + 1
+        pending = nano.get_pending(str(account))
+
         if counter == 30:
             print("\nWaited 1 minute... Going back to menu, please check if transaction went through...")
             break
         else:
-            if len(pending) == 0:
-                pending = nano.get_pending(str(account))
+            if len(pending) == 0 or pending == "timeout":
                 print('.', end='', flush=True)
                 time.sleep(2)
             else:
                 print("\nPending transaction detected")
                 break
-
-def print_decimal(float_number):
-    return float_number
+                    
+        counter = counter + 1
 
 def read_encrypted(password, filename, string=True):
     with open(filename, 'rb') as input:
@@ -148,8 +142,12 @@ class SimpleTcpClient(object):
 
 
                         if current_balance == 'Empty' or current_balance == '':
-                            return_string = "Error empty balance"
+                            return_string = "Error - empty balance"
                             yield self.stream.write(return_string.encode('ascii'))
+                        elif current_balance == 'timeout':
+                            return_string = "Error - timeout checking balance"
+                            yield self.stream.write(return_string.encode('ascii'))
+                        
                         if int(current_balance) >= server_payin:
                             t = threading.Thread(target=send_xrb_thread, args=(dest_account, int(amount), self.account, int(self.index), self.wallet_seed,))
                             t.start()
@@ -172,17 +170,18 @@ class SimpleTcpClient(object):
                     try:
                         current_balance = nano.get_account_balance(self.account)
                         print(current_balance)
-                        new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                     except:
                         pass
 
-                    if new_balance != 'Empty':
-                        print("Balance: {:.3}".format(new_balance))
-                        #print("- $:",Decimal(r.json()['NANO']['USD'])*new_balance)
-                        #print("- £:",Decimal(r.json()['NANO']['GBP'])*new_balance)
-                        #print("- €:",Decimal(r.json()['NANO']['EUR'])*new_balance)
+                    if current_balance == 'Empty':
+                        return_string = "Error - empty balance"
+                    elif current_balance == 'Timeout':
+                        return_string = "Error - timeout checking balance"
+                    else:
+                        new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
+                        print("Balance: {:.5}".format(new_balance))
+                        return_string = "{:.5} Nano".format(new_balance)
                     
-                    return_string = "{:.5} Nano".format(new_balance)
                     yield self.stream.write(return_string.encode('ascii'))
 
                 elif split_data[0] == "nano_address":
@@ -192,11 +191,13 @@ class SimpleTcpClient(object):
                 elif split_data[0] == "rates":
                     try:
                         r = nano.get_rates()
+                        return_string = "USD:" + str(r.json()['NANO']['USD']) + " - GBP:" + str(r.json()['NANO']['GBP']) + " - EURO:" + str(r.json()['NANO']['EUR'])
+                        yield self.stream.write(return_string.encode('ascii'))
+
                     except:
                         pass 
                     
-                    return_string = "USD:" + str(r.json()['NANO']['USD']) + " - GBP:" + str(r.json()['NANO']['GBP']) + " - EURO:" + str(r.json()['NANO']['EUR'])
-                    yield self.stream.write(return_string.encode('ascii'))
+
 
         except tornado.iostream.StreamClosedError:
                 pass
@@ -223,10 +224,10 @@ def check_account(account, wallet_seed, index):
     #print("Check for blocks")
     pending = nano.get_pending(str(account))
     #print("Pending Len:" + str(len(pending)))
-    
-    while len(pending) > 0:
-        pending = nano.get_pending(str(account))
-        nano.receive_xrb(int(index), account, wallet_seed)
+    if pending != "timeout":
+        while len(pending) > 0:
+            pending = nano.get_pending(str(account))
+            nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
     print("Starting NanoQuake2...")
@@ -288,7 +289,7 @@ def main():
 
     if previous != "":
         current_balance = Decimal(nano.get_account_balance(account)) / Decimal(raw_in_xrb)
-        print("Your balance is {:.5} Nano".format(print_decimal(current_balance)))
+        print("Your balance is {:.5} Nano".format(current_balance))
     else:
         current_balance = 0
         print("Your balance is 0 Nano")
@@ -329,15 +330,20 @@ def main():
              current_balance = nano.get_account_balance(account)
              if current_balance == "":
                 current_balance = 0
+             elif current_balance == "timeout":
+                 print("\nTimeout Error - try again")
              if int(current_balance) < server_payin:
                 print()
                 print("Insufficient funds - please deposit at least 0.1 Nano")
                 print("{} Raw Detected...".format(current_balance))
                 #Scan for new blocks, wait for pending
              pending = nano.get_pending(str(account))
-             if len(pending) > 0:
-                print()
-                print("This account has pending transactions. Follow option 2 to process...".format(current_balance))
+             if pending == "timeout":
+                print("Error - timeout")
+             else:
+                 if len(pending) > 0:
+                    print()
+                    print("This account has pending transactions. Follow option 2 to process...".format(current_balance))
 
              print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
@@ -348,12 +354,19 @@ def main():
             print("Withdraw Funds")
             withdraw_dest = input("Destination Address: ")
             current_balance = nano.get_account_balance(account)
-            nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
+            if current_balance == "timeout":
+                print("Error - timeout, try again")
+            else:
+                nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
 
         elif menu1 == 2:
             display_qr(account)
             previous = nano.get_previous(str(account))
+            if previous == "timeout":
+                continue
             pending = nano.get_pending(str(account))
+            if pending == "timeout":
+                continue
 
             #Scan for new blocks, wait for pending
             if len(pending) == 0:
@@ -362,12 +375,17 @@ def main():
             
             # Process any pending blocks
             pending = nano.get_pending(str(account))
-            
+            if pending == "timeout":
+                continue
+
             if len(pending) > 0:
                 print("Processing...")
 
             while len(pending) > 0:
                 pending = nano.get_pending(str(account))
+                if pending == "timeout":
+                    continue
+
                 if len(previous) == 0:
                     print("Opening Account")
                     nano.open_xrb(int(index), account, wallet_seed)
@@ -380,6 +398,8 @@ def main():
                     time.sleep(2) #give it chance so we down display message twice
 
             current_balance = nano.get_account_balance(account)
+            if current_balance == "timeout":
+                continue
             if int(current_balance) < server_payin:
                 print()
                 print("Insufficient funds - please deposit at least 0.1 Nano")
@@ -390,14 +410,6 @@ def main():
                 print("Your balance is {:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
         elif menu1 == 1:
-            current_balance = nano.get_account_balance(account)
-            
-            #try:
-            current_dir = os.getcwd()
-            print(current_dir)
-            #os.remove('~/.yq2/baseq2/config.cfg')
-                #except OSError:
-                #    pass
 
             print("Starting Quake2")
             #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
