@@ -281,12 +281,14 @@ def main():
             print("Generating Wallet Seed")
             full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
             wallet_seed = full_wallet_seed[2:].upper()
+            print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
 
         elif premenu == 2:
             imported_seed = input("Your wallet seed (64 chars): ")
             wallet_seed = imported_seed.upper()
+            print("If you still have an old encrypted seed (in seed.txt) remember that it is unsafe, you should delete it, once you have backed up your seed safely")
         
-        print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
+
         write_encrypted(password.encode('utf8'), 'seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')

@@ -175,9 +175,13 @@ def get_address(index, wallet_seed):
     return account
 
 def get_rates():
-    r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake', timeout=1)
-    print("Querying CryptoCompare for fiat rates")
-    return r
+    try:
+        r = requests.get('https://min-api.cryptocompare.com/data/pricemulti?fsyms=NANO&tsyms=USD,EUR,GBP&extraParams=nanoquake', timeout=3)
+        print("Querying CryptoCompare for fiat rates")
+        return r
+    except requests.exceptions.Timeout:
+        print("Error: Timeout")
+        return "timeout"
 
 
 def open_xrb(index, account, wallet_seed):
