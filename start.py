@@ -246,15 +246,16 @@ def check_account(account, wallet_seed, index):
             nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
+    dir_path = os.getcwd()
     print("Starting NanoQuake2...")
-    print("* This version now uses AES not DES to encrypt your seed, if you are upgrading please import your old seed otherwise generate a new seed.*")
     print()
-
-    old_exists = os.path.isfile('seed.txt')
+    print("Current Dir: {}".format(dir_path))
+    
+    old_exists = os.path.isfile(dir_path + '/seed.txt')
     if old_exists == True:
         print("Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script")
     
-    exists = os.path.isfile('seedAES.txt')
+    exists = os.path.isfile(dir_path + '/seedAES.txt')
     
     while True:
         if exists:
@@ -289,7 +290,7 @@ def main():
             print("If you still have an old encrypted seed (in seed.txt) remember that it is unsafe, you should delete it, once you have backed up your seed safely")
         
 
-        write_encrypted(password.encode('utf8'), 'seedAES.txt', wallet_seed)
+        write_encrypted(password.encode('utf8'), dir_path + '/seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')
         print("Public Key: ", str(public_key))
@@ -304,7 +305,7 @@ def main():
         print("Seed file found")
         print("Decoding wallet seed with your password")
         try:
-            wallet_seed = read_encrypted(password.encode('utf8'), 'seedAES.txt', string=True)
+            wallet_seed = read_encrypted(password.encode('utf8'), dir_path + '/seedAES.txt', string=True)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
             print("Public Key: ", str(public_key))
