@@ -4,11 +4,12 @@ import hashlib
 import subprocess
 from prompt_toolkit import prompt
 from Crypto.Cipher import AES
-import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading
+import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 import tkinter
 from decimal import Decimal
+from pathlib import Path
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -246,16 +247,36 @@ def check_account(account, wallet_seed, index):
             nano.receive_xrb(int(index), account, wallet_seed)
 
 def main():
-    dir_path = os.getcwd()
+    dir_path = str(Path.home())
     print("Starting NanoQuake2...")
     print()
     print("Current Dir: {}".format(dir_path))
+    print("System: {}".format(platform.system()))
     
-    old_exists = os.path.isfile(dir_path + '/seed.txt')
+    
+    if(platform.system() == "Linux" or platform.system() == "Darwin"):
+        dir_exists = os.path.isfile(dir_path + '/.nanoquake')
+        if dir_exists == 'False':
+            os.mkdir(dir_path + '/.nanoquake')
+        nanoquake_path = dir_path + '/.nanoquake'
+
+    elif(platform.system() == "Windows"):
+        dir_exists = os.path.isfile(dir_path + 'AppData/Local/NanoQuake')
+        if dir_exists == False:
+            os.mkdir(dir_path + 'AppData/Local/NanoQuake')
+        nanoquake_path = dir_path + 'AppData/Local/NanoQuake'
+    else:
+        print("Error - system not recognised")
+        time.sleep(5)
+        sys.exit()
+
+    print("Config Directory: {}".format(nanoquake_path))
+    
+    old_exists = os.path.isfile(nanoquake_path + '/seed.txt')
     if old_exists == True:
         print("Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script")
     
-    exists = os.path.isfile(dir_path + '/seedAES.txt')
+    exists = os.path.isfile(nanoquake_path + '/seedAES.txt')
     
     while True:
         if exists:
@@ -290,7 +311,7 @@ def main():
             print("If you still have an old encrypted seed (in seed.txt) remember that it is unsafe, you should delete it, once you have backed up your seed safely")
         
 
-        write_encrypted(password.encode('utf8'), dir_path + '/seedAES.txt', wallet_seed)
+        write_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
         public_key = str(binascii.hexlify(pub_key), 'ascii')
         print("Public Key: ", str(public_key))
@@ -305,7 +326,7 @@ def main():
         print("Seed file found")
         print("Decoding wallet seed with your password")
         try:
-            wallet_seed = read_encrypted(password.encode('utf8'), dir_path + '/seedAES.txt', string=True)
+            wallet_seed = read_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', string=True)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
             print("Public Key: ", str(public_key))
