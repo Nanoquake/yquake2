@@ -261,10 +261,10 @@ def main():
         nanoquake_path = dir_path + '/.nanoquake'
 
     elif(platform.system() == "Windows"):
-        dir_exists = os.path.isfile(dir_path + 'AppData/Local/NanoQuake')
+        dir_exists = os.path.isfile(dir_path + '/AppData/Local/NanoQuake')
         if dir_exists == False:
-            os.mkdir(dir_path + 'AppData/Local/NanoQuake')
-        nanoquake_path = dir_path + 'AppData/Local/NanoQuake'
+            os.mkdir(dir_path + '/AppData/Local/NanoQuake')
+        nanoquake_path = dir_path + '/AppData/Local/NanoQuake'
     else:
         print("Error - system not recognised")
         time.sleep(5)
