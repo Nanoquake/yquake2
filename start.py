@@ -252,6 +252,8 @@ def main():
     print()
     print("Current Dir: {}".format(dir_path))
     print("System: {}".format(platform.system()))
+    work_dir = os.path.dirname(sys.executable)
+    print("Work Dir: {}".format(work_dir))
     
     
     if(platform.system() == "Linux" or platform.system() == "Darwin"):
@@ -464,13 +466,13 @@ def main():
         elif menu1 == 1:
 
             print("Starting Quake2")
-            #game_args = "+set nano_address {} +set vid_fullscreen 0".format(account[4:])
+
             game_args = "+set vid_fullscreen 0 &"
             print(game_args)
             if platform.system() == 'Windows':
                 full_command = "start quake2 " + game_args
             else:
-                full_command = "release/quake2 " + game_args
+                full_command = work_dir + "/release/quake2 " + game_args
             print(full_command)
 
             process = subprocess.run(full_command, shell=True)
