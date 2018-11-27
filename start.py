@@ -1,15 +1,12 @@
-from nano25519 import ed25519_oop as ed25519
-from hashlib import blake2b
-import hashlib
-import subprocess
-from prompt_toolkit import prompt
-from Crypto.Cipher import AES
-import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform
+import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform, tkinter, hashlib, subprocess, urllib.request, zipfile, shutil
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
-import tkinter
 from decimal import Decimal
 from pathlib import Path
+from nano25519 import ed25519_oop as ed25519
+from hashlib import blake2b
+from prompt_toolkit import prompt
+from Crypto.Cipher import AES
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -17,6 +14,20 @@ HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 last_pay_time = 0
+
+pbar = None
+
+
+def reporthook(blocknum, blocksize, totalsize):
+    readsofar = blocknum * blocksize
+    if totalsize > 0:
+        percent = readsofar * 1e2 / totalsize
+        s = "\r%5.1f%% %*d / %d" % (percent, len(str(totalsize)), readsofar, totalsize)
+        sys.stderr.write(s)
+        if readsofar >= totalsize: # near the end
+            sys.stderr.write("\n")
+    else: # total size is unknown
+        sys.stderr.write("read %d\n" % (readsofar,))
 
 def display_qr(account):
     data = 'xrb:' + account
@@ -252,21 +263,31 @@ def main():
     print()
     print("Current Dir: {}".format(dir_path))
     print("System: {}".format(platform.system()))
-    work_dir = os.path.dirname(sys.executable)
+    
+    # determine if application is a script file or frozen exe
+    # https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
+    if getattr(sys, 'frozen', False):
+        work_dir = sys._MEIPASS
+    elif __file__:
+        work_dir = os.path.dirname(os.path.abspath(__file__))
+
     print("Work Dir: {}".format(work_dir))
     
     
     if(platform.system() == "Linux" or platform.system() == "Darwin"):
-        dir_exists = os.path.isfile(dir_path + '/.nanoquake')
-        if dir_exists == 'False':
+        dir_exists = Path(dir_path + '/.nanoquake').exists()
+        if dir_exists == False:
+            print("Making a new config directory")
             os.mkdir(dir_path + '/.nanoquake')
         nanoquake_path = dir_path + '/.nanoquake'
 
     elif(platform.system() == "Windows"):
-        dir_exists = os.path.isfile(dir_path + '/AppData/Local/NanoQuake')
+        dir_exists = Path(dir_path + '/AppData/Local/NanoQuake').exists()
         if dir_exists == False:
+            print("Making a new config directory")
             os.mkdir(dir_path + '/AppData/Local/NanoQuake')
         nanoquake_path = dir_path + '/AppData/Local/NanoQuake'
+
     else:
         print("Error - system not recognised")
         time.sleep(5)
@@ -274,11 +295,11 @@ def main():
 
     print("Config Directory: {}".format(nanoquake_path))
     
-    old_exists = os.path.isfile(nanoquake_path + '/seed.txt')
+    old_exists = Path(nanoquake_path + '/seed.txt').exists()
     if old_exists == True:
         print("Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script")
     
-    exists = os.path.isfile(nanoquake_path + '/seedAES.txt')
+    exists = Path(nanoquake_path + '/seedAES.txt').exists()
     
     while True:
         if exists:
@@ -355,6 +376,42 @@ def main():
         print("- £:",r.json()['NANO']['GBP'])
         print("- €:",r.json()['NANO']['EUR'])
 
+    if Path(work_dir + '/release/baseq2/pak0.pak').exists() == False or Path(work_dir + '/release/baseq2/players').exists() == False:
+        print("No Demo Files present, do you want to download them?")
+        reply = input("Y/N: ")
+        
+        if reply == 'y' or reply == 'Y':
+            if Path(work_dir + '/q2-314-demo-x86.exe').exists() == False:
+                print("Downloading...")
+                urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', work_dir + '/q2-314-demo-x86.exe', reporthook)
+            print("Download Complete, now unziping...")
+            with zipfile.ZipFile(work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
+                zip_ref.extractall(work_dir + '/demo/')
+            print("Copying Files")
+            shutil.copy(work_dir + '/demo/Install/Data/baseq2/pak0.pak', work_dir + '/release/baseq2/pak0.pak')
+            shutil.copytree(work_dir + '/demo/Install/Data/baseq2/players', work_dir + '/release/baseq2/players')
+            print("Grabbing Maps")
+            if Path(work_dir + '/release/baseq2/maps').exists() == False:
+                os.mkdir(work_dir + '/release/baseq2/maps')
+            
+            print(" - q2dm1")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
+            except:
+                print("Failed to download q2dm1")
+            print(" - ztn2dm1")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
+            except:
+                print("Failed to download ztn2dm1")
+            print(" - tltf")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
+            except:
+                print("Failed to download tltf")
+        else:
+            print("Not downloading")
+    
  
 
     while True:
