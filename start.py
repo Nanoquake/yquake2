@@ -383,8 +383,14 @@ def main():
         if reply == 'y' or reply == 'Y':
             if Path(work_dir + '/q2-314-demo-x86.exe').exists() == False:
                 print("Downloading...")
-                urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', work_dir + '/q2-314-demo-x86.exe', reporthook)
-            print("Download Complete, now unziping...")
+                try:
+                    urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', work_dir + '/q2-314-demo-x86.exe', reporthook)
+                except:
+                    print("Failed to download demo files")
+                    time.sleep(5)
+                    sys.exit()
+                        
+            print("Download Complete, now unzipping...")
             with zipfile.ZipFile(work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
                 zip_ref.extractall(work_dir + '/demo/')
             print("Copying Files")
