@@ -203,7 +203,7 @@ class SimpleTcpClient(object):
 
                     if current_balance == 'Empty':
                         return_string = "Error - empty balance"
-                    elif current_balance == 'Timeout':
+                    elif current_balance == 'timeout':
                         return_string = "Error - timeout checking balance"
                     else:
                         new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
