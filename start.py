@@ -430,7 +430,7 @@ def update_txt(root, y, account, wallet_seed, index):
     current_balance = nano.get_account_balance(account)
     #y.config(text=str(time.time()))
     if current_balance != "timeout":
-        y.config(text=str(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        y.config(text="{:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
         y.config(text="Timeout")
 
@@ -566,7 +566,7 @@ def main():
     y = Label(root, text="Your Balance: ")
     y.pack()
     if current_balance != "timeout":
-        y = Label(root, text=(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        y = Label(root, text="{:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
         y = Label(root, text="Timeout")
 
@@ -581,8 +581,6 @@ def main():
     quit.pack(pady=5)
 
     root.update()
-    
-    #update_txt(root, y, account)
 
     root.after(5000,lambda: update_txt(root, y, account, wallet_seed, index))
     root.mainloop()
