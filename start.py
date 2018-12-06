@@ -1,4 +1,5 @@
-import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform, tkinter, hashlib, subprocess, urllib.request, zipfile, shutil
+import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform, hashlib, subprocess, urllib.request, zipfile, shutil
+from tkinter import *
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 from decimal import Decimal
@@ -22,6 +23,8 @@ def reporthook(blocknum, blocksize, totalsize):
     readsofar = blocknum * blocksize
     if totalsize > 0:
         percent = readsofar * 1e2 / totalsize
+        if percent >= 100:
+            percent = 100
         s = "\r%5.1f%% %*d / %d" % (percent, len(str(totalsize)), readsofar, totalsize)
         sys.stderr.write(s)
         if readsofar >= totalsize: # near the end
@@ -257,6 +260,183 @@ def check_account(account, wallet_seed, index):
             pending = nano.get_pending(str(account))
             nano.receive_xrb(int(index), account, wallet_seed)
 
+class PasswordDialog:
+    
+    def __init__(self, parent, exists):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        
+        if exists == True:
+            Label(top, text="Enter Your Password").pack()
+        else:
+            Label(top, text="Enter New Password").pack()
+        
+        self.e = Entry(top, show='*')
+        self.e.pack(padx=5)
+        
+        Label(top, text="Confirm").pack()
+        
+        self.f = Entry(top, show='*')
+        self.f.pack(padx=5)
+        
+        b = Button(top, text="OK", command=self.ok)
+        b.pack(pady=5)
+    
+    def ok(self):
+
+        if self.e.get() == self.f.get():
+            self.password = self.e.get()
+            self.top.destroy()
+
+    def get_password(self):
+        return self.password
+
+class withdrawAllDialog:
+    
+    def __init__(self, parent, account, index, wallet_seed):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        
+        self.account = account
+        self.index = index
+        self.wallet_seed = wallet_seed
+
+        Label(top, text="Destination Address").pack()
+        
+        self.withdraw_dest = Entry(top)
+        self.withdraw_dest.pack(padx=5)
+        
+        c = Button(top, text="OK", command=self.withdraw)
+        c.pack(pady=5)
+    
+    def withdraw(self):
+        current_balance = nano.get_account_balance(self.account)
+        if current_balance == "timeout":
+            print("Error - timeout, try again")
+        else:
+            nano.send_xrb(self.withdraw_dest.get(), int(current_balance), self.account, int(self.index), self.wallet_seed)
+        self.top.destroy()
+
+class DownloadDialog:
+    
+    def __init__(self, parent, work_dir):
+        
+        self.work_dir = work_dir
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        
+        Label(top, text="Download Maps").pack()
+        
+        c = Button(top, text="Yes", command=self.download)
+        c.pack(pady=5)
+        d = Button(top, text="No", command=self.closeWindow)
+        d.pack(pady=5)
+    
+    def download(self):
+        if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
+            print("Downloading...")
+            try:
+                urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', self.work_dir + '/q2-314-demo-x86.exe', reporthook)
+            except:
+                print("Failed to download demo files")
+                time.sleep(5)
+                sys.exit()
+            
+            print("Download Complete, now unzipping...")
+            with zipfile.ZipFile(self.work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
+                zip_ref.extractall(self.work_dir + '/demo/')
+            
+            print("Copying Files")
+            shutil.copy(self.work_dir + '/demo/Install/Data/baseq2/pak0.pak', self.work_dir + '/release/baseq2/pak0.pak')
+            shutil.copytree(self.work_dir + '/demo/Install/Data/baseq2/players', self.work_dir + '/release/baseq2/players')
+            
+            print("Grabbing Maps")
+            if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
+                os.mkdir(self.work_dir + '/release/baseq2/maps')
+            
+            print(" - q2dm1")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', self.work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
+            except:
+                print("Failed to download q2dm1")
+            print(" - ztn2dm1")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', self.work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
+            except:
+                print("Failed to download ztn2dm1")
+            print(" - tltf")
+            try:
+                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', self.work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
+            except:
+                print("Failed to download tltf")
+
+        self.top.destroy()
+
+    def closeWindow(self):
+        self.top.destroy()
+
+def startGame(work_dir):
+    print("Starting Quake2")
+        
+    game_args = "+set vid_fullscreen 0 &"
+    print(game_args)
+    if platform.system() == 'Windows':
+        full_command = "start " + work_dir + "/release/yquake2 " + game_args
+    else:
+        full_command = work_dir + "/release/quake2 " + game_args
+        print(full_command)
+            
+        process = subprocess.run(full_command, shell=True)
+            
+        # tcp server
+        server = SimpleTcpServer(account, wallet_seed, index)
+        server.listen(PORT, HOST)
+        print("Listening on %s:%d..." % (HOST, PORT))
+            
+        #
+        pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
+        pc.start()
+            
+        # infinite loop
+        tornado.ioloop.IOLoop.instance().start()
+
+def exitGame():
+    print("Shutdown Socket Server and Exit")
+    tornado.ioloop.IOLoop.instance().stop()
+    sys.exit()
+
+def update_txt(root, y, account, wallet_seed, index):
+    # Process any pending blocks
+    pending = nano.get_pending(str(account))
+
+    previous = nano.get_previous(str(account))
+    if len(pending) > 0:
+        print("Processing...")
+        while len(pending) > 0:
+            pending = nano.get_pending(str(account))
+            if pending == "timeout":
+                continue
+        
+            if len(previous) == 0:
+                print("Opening Account")
+                nano.open_xrb(int(index), account, wallet_seed)
+                #We get previous after opening the account to switch it to receive rather than open
+                previous = nano.get_previous(str(account))
+            else:
+                nano.receive_xrb(int(index), account, wallet_seed)
+    
+    current_balance = nano.get_account_balance(account)
+    #y.config(text=str(time.time()))
+    if current_balance != "timeout":
+        y.config(text=str(Decimal(current_balance) / Decimal(raw_in_xrb)))
+    else:
+        y.config(text="Timeout")
+
+    root.update_idletasks()
+    root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index))
+
 def main():
     dir_path = str(Path.home())
     print("Starting NanoQuake2...")
@@ -300,39 +480,28 @@ def main():
         print("Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script")
     
     exists = Path(nanoquake_path + '/seedAES.txt').exists()
-    
-    while True:
-        if exists:
-            password = prompt('Enter password: ', is_password=True)
-        else:
-            password = prompt('Please enter a new password: ', is_password=True)
-        password_confirm = prompt('Confirm password: ', is_password=True)
-        if password == password_confirm:
-            break
-        else:
-            print("Password Mismatch!")
 
+    root = Tk()
+    root.geometry("500x500")
+    w = Label(root, text="NanoQuake", bg="green", fg="black")
+    w.pack(fill=X)
+
+    root.update()
+
+    d = PasswordDialog(root, exists)
+
+    root.wait_window(d.top)
+
+    password = d.get_password()
 
     if exists == False:
-        print()
-        print("1. Generate a new seed")
-        print("2. Import a seed")
-        
-        premenu = int(input("Please select an option: "))
         
         wallet_seed = None
         
-        if premenu == 1:
-            print("Generating Wallet Seed")
-            full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
-            wallet_seed = full_wallet_seed[2:].upper()
-            print("Wallet Seed (make a copy of this in a safe place!): ", wallet_seed)
-
-        elif premenu == 2:
-            imported_seed = input("Your wallet seed (64 chars): ")
-            wallet_seed = imported_seed.upper()
-            print("If you still have an old encrypted seed (in seed.txt) remember that it is unsafe, you should delete it, once you have backed up your seed safely")
+        genImpSeed = GenerateSeedDialog(root)
+        root.wait_window(genImpSeed.top)
         
+        wallet_seed = genImpSeed.get_seed()
 
         write_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', wallet_seed)
         priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
@@ -377,183 +546,46 @@ def main():
         print("- €:",r.json()['NANO']['EUR'])
 
     if Path(work_dir + '/release/baseq2/pak0.pak').exists() == False or Path(work_dir + '/release/baseq2/players').exists() == False:
-        print("No Demo Files present, do you want to download them?")
-        reply = input("Y/N: ")
         
-        if reply == 'y' or reply == 'Y':
-            if Path(work_dir + '/q2-314-demo-x86.exe').exists() == False:
-                print("Downloading...")
-                try:
-                    urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', work_dir + '/q2-314-demo-x86.exe', reporthook)
-                except:
-                    print("Failed to download demo files")
-                    time.sleep(5)
-                    sys.exit()
-                        
-            print("Download Complete, now unzipping...")
-            with zipfile.ZipFile(work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
-                zip_ref.extractall(work_dir + '/demo/')
-            print("Copying Files")
-            shutil.copy(work_dir + '/demo/Install/Data/baseq2/pak0.pak', work_dir + '/release/baseq2/pak0.pak')
-            shutil.copytree(work_dir + '/demo/Install/Data/baseq2/players', work_dir + '/release/baseq2/players')
-            print("Grabbing Maps")
-            if Path(work_dir + '/release/baseq2/maps').exists() == False:
-                os.mkdir(work_dir + '/release/baseq2/maps')
-            
-            print(" - q2dm1")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
-            except:
-                print("Failed to download q2dm1")
-            print(" - ztn2dm1")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
-            except:
-                print("Failed to download ztn2dm1")
-            print(" - tltf")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
-            except:
-                print("Failed to download tltf")
-        else:
-            print("Not downloading")
+        f = DownloadDialog(root, work_dir)
+        root.wait_window(f.top)
     
+    data = 'xrb:' + account
+    xrb_qr = pyqrcode.create(data)
+    code_xbm = xrb_qr.xbm(scale=4)
+    code_bmp = BitmapImage(data=code_xbm)
+    code_bmp.config(background="white")
+    label = Label(root, image=code_bmp)
+    label.pack()
+    
+    w = Label(root, text="Your Game Account: ")
+    w.pack()
+    w = Label(root, text=account)
+    w.pack()
+    w.pack(fill=X)
+    y = Label(root, text="Your Balance: ")
+    y.pack()
+    if current_balance != "timeout":
+        y = Label(root, text=(Decimal(current_balance) / Decimal(raw_in_xrb)))
+    else:
+        y = Label(root, text="Timeout")
+
+    y.pack()
+    c = Button(root, text="Start Game", command=lambda: startGame(work_dir))
+    c.pack(pady=5)
  
+    withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed))
+    withdraw.pack(pady=5)
+    
+    quit = Button(root, text="Exit", command=exitGame)
+    quit.pack(pady=5)
 
-    while True:
-        print()
-        print("--------------")
-        print("NanoQuake Menu")
-        print("--------------")
-        print("1. Start Game - Lets Get REKT...")
-        print("2. Top-up Game Balance")
-        print("3. Withdraw Funds")
-        print("4. Display Seed")
-        print("5. Check Balance")
-        print("6. Exit")
-        print()
+    root.update()
+    
+    #update_txt(root, y, account)
 
-        menu1 = 0
-        try:
-            menu1 = int(input("Please select an option: "))
-        except:
-            pass
-
-        if menu1 == 6:
-            print("Exiting NanoQuake")
-            sys.exit()
-
-        elif menu1 == 5:
-             current_balance = nano.get_account_balance(account)
-             if current_balance == "":
-                current_balance = 0
-             elif current_balance == "timeout":
-                 print("\nTimeout Error - try again")
-             if int(current_balance) < server_payin:
-                print()
-                print("Insufficient funds - please deposit at least 0.1 Nano")
-                print("{} Raw Detected...".format(current_balance))
-                #Scan for new blocks, wait for pending
-             pending = nano.get_pending(str(account))
-             if pending == "timeout":
-                print("Error - timeout")
-             else:
-                 if len(pending) > 0:
-                    print()
-                    print("This account has pending transactions. Follow option 2 to process...".format(current_balance))
-
-             print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
-
-        elif menu1 == 4:
-             print("\nSeed: {}\n".format(wallet_seed))
-
-        elif menu1 == 3:
-            print("Withdraw Funds")
-            withdraw_dest = input("Destination Address: ")
-            current_balance = nano.get_account_balance(account)
-            if current_balance == "timeout":
-                print("Error - timeout, try again")
-            else:
-                nano.send_xrb(withdraw_dest, int(current_balance), account, int(index), wallet_seed)
-
-        elif menu1 == 2:
-            display_qr(account)
-            previous = nano.get_previous(str(account))
-            if previous == "timeout":
-                continue
-            pending = nano.get_pending(str(account))
-            if pending == "timeout":
-                continue
-
-            #Scan for new blocks, wait for pending
-            if len(pending) == 0:
-                print("Waiting for funds...")
-                wait_for_reply(account)
-            
-            # Process any pending blocks
-            pending = nano.get_pending(str(account))
-            if pending == "timeout":
-                continue
-
-            if len(pending) > 0:
-                print("Processing...")
-
-            while len(pending) > 0:
-                pending = nano.get_pending(str(account))
-                if pending == "timeout":
-                    continue
-
-                if len(previous) == 0:
-                    print("Opening Account")
-                    nano.open_xrb(int(index), account, wallet_seed)
-                    #We get previous after opening the account to switch it to receive rather than open
-                    time.sleep(2) #Just to make sure that the block as been recorded
-                    previous = nano.get_previous(str(account))
-                else:
-                    nano.receive_xrb(int(index), account, wallet_seed)
-                    print('.', end='', flush=True)
-                    time.sleep(2) #give it chance so we down display message twice
-
-            current_balance = nano.get_account_balance(account)
-            if current_balance == "timeout":
-                continue
-            if int(current_balance) < server_payin:
-                print()
-                print("Insufficient funds - please deposit at least 0.1 Nano")
-                print("({} Raw Detected)".format(current_balance))
-            else:
-                print()
-                print("Sufficient Funds - Lets Go!")
-                print("Your balance is {:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
-
-        elif menu1 == 1:
-
-            print("Starting Quake2")
-
-            game_args = "+set vid_fullscreen 0 &"
-            print(game_args)
-            if platform.system() == 'Windows':
-                full_command = "start " + work_dir + "/release/yquake2 " + game_args
-            else:
-                full_command = work_dir + "/release/quake2 " + game_args
-            print(full_command)
-
-            process = subprocess.run(full_command, shell=True)
-
-            # tcp server
-            server = SimpleTcpServer(account, wallet_seed, index)
-            server.listen(PORT, HOST)
-            print("Listening on %s:%d..." % (HOST, PORT))
-            
-            #
-            pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
-            pc.start()
-            
-            # infinite loop
-            tornado.ioloop.IOLoop.instance().start()
-        else:
-            print("Error, incorrect option selected")
-            sys.exit()
+    root.after(5000,lambda: update_txt(root, y, account, wallet_seed, index))
+    root.mainloop()
 
 if __name__ == "__main__":
     
