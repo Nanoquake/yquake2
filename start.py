@@ -430,7 +430,7 @@ def update_txt(root, y, account, wallet_seed, index):
     
     current_balance = nano.get_account_balance(account)
     if current_balance != "timeout":
-        y.config(text="{:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        y.config(text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
         y.config(text="Timeout")
 
@@ -534,7 +534,7 @@ def main():
     print("This is your game account address: {}".format(account))
     current_balance = nano.get_account_balance(account)
     if current_balance != "timeout":
-        print("\nBalance: {:.5} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        print("\nBalance: {:.3} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
     r = nano.get_rates()
     if r != "timeout":
@@ -566,7 +566,7 @@ def main():
     y = Label(root, text="Your Balance: ")
     y.pack()
     if current_balance != "timeout":
-        y = Label(root, text="{:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        y = Label(root, text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
         y = Label(root, text="Timeout")
 
