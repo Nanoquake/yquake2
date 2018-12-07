@@ -319,6 +319,39 @@ class withdrawAllDialog:
             nano.send_xrb(self.withdraw_dest.get(), int(current_balance), self.account, int(self.index), self.wallet_seed)
         self.top.destroy()
 
+class GenerateSeedDialog:
+    
+    def __init__(self, parent, wallet_seed):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+ 
+        self.wallet_seed = wallet_seed
+        
+        generate = Button(top, text="Generate New Seed", command=self.generateSeed)
+        generate.pack(pady=5)
+        
+        Label(top, text="Import Seed").pack()
+        
+        self.import_seed = Entry(top)
+        self.import_seed.pack(padx=5)
+        
+        c = Button(top, text="OK", command=self.import_func)
+        c.pack(pady=5)
+    
+    def generateSeed(self):
+        full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
+        self.wallet_seed = full_wallet_seed[2:].upper()
+        print("Wallet Seed (make a copy of this in a safe place!): {}".format(self.wallet_seed))
+        self.top.destroy()
+    
+    def import_func(self):
+        self.wallet_seed = self.import_seed.get().upper()
+        self.top.destroy()
+
+    def get_seed(self):
+        return self.wallet_seed
+
 class DownloadDialog:
     
     def __init__(self, parent, work_dir):
@@ -498,7 +531,7 @@ def main():
         
         wallet_seed = None
         
-        genImpSeed = GenerateSeedDialog(root)
+        genImpSeed = GenerateSeedDialog(root, wallet_seed)
         root.wait_window(genImpSeed.top)
         
         wallet_seed = genImpSeed.get_seed()
