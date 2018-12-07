@@ -377,7 +377,7 @@ class DownloadDialog:
     def closeWindow(self):
         self.top.destroy()
 
-def startGame(work_dir):
+def startGame(work_dir, account, wallet_seed, index):
     print("Starting Quake2")
         
     game_args = "+set vid_fullscreen 0 &"
@@ -428,7 +428,6 @@ def update_txt(root, y, account, wallet_seed, index):
                 nano.receive_xrb(int(index), account, wallet_seed)
     
     current_balance = nano.get_account_balance(account)
-    #y.config(text=str(time.time()))
     if current_balance != "timeout":
         y.config(text="{:.5} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
@@ -571,7 +570,7 @@ def main():
         y = Label(root, text="Timeout")
 
     y.pack()
-    c = Button(root, text="Start Game", command=lambda: startGame(work_dir))
+    c = Button(root, text="Start Game", command=lambda: startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
     withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed))
