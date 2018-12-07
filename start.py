@@ -386,21 +386,22 @@ def startGame(work_dir, account, wallet_seed, index):
         full_command = "start " + work_dir + "/release/yquake2 " + game_args
     else:
         full_command = work_dir + "/release/quake2 " + game_args
-        print(full_command)
+
+    print(full_command)
             
-        process = subprocess.run(full_command, shell=True)
+    process = subprocess.run(full_command, shell=True)
             
-        # tcp server
-        server = SimpleTcpServer(account, wallet_seed, index)
-        server.listen(PORT, HOST)
-        print("Listening on %s:%d..." % (HOST, PORT))
+    # tcp server
+    server = SimpleTcpServer(account, wallet_seed, index)
+    server.listen(PORT, HOST)
+    print("Listening on %s:%d..." % (HOST, PORT))
             
-        #
-        pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
-        pc.start()
+    #
+    pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
+    pc.start()
             
-        # infinite loop
-        tornado.ioloop.IOLoop.instance().start()
+    # infinite loop
+    tornado.ioloop.IOLoop.instance().start()
 
 def exitGame():
     print("Shutdown Socket Server and Exit")
