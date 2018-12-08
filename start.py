@@ -460,12 +460,15 @@ def update_txt(root, y, account, wallet_seed, index):
                 previous = nano.get_previous(str(account))
             else:
                 nano.receive_xrb(int(index), account, wallet_seed)
-    
-    current_balance = nano.get_account_balance(account)
-    if current_balance != "timeout":
-        y.config(text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
-    else:
-        y.config(text="Timeout")
+
+    try:
+        current_balance = nano.get_account_balance(account)
+        if current_balance != "timeout":
+            y.config(text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        else:
+            y.config(text="Timeout")
+    except:
+        y.config(text="Account Not Open")
 
     root.update_idletasks()
     root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index))
@@ -593,7 +596,9 @@ def main():
     
     w = Label(root, text="Your Game Account: ")
     w.pack()
-    w = Label(root, text=account)
+    data_string = StringVar()
+    data_string.set(account)
+    w = Entry(root, textvariable=data_string, fg="black", bg="white", bd=0, state="readonly")
     w.pack()
     w.pack(fill=X)
     y = Label(root, text="Your Balance: ")
