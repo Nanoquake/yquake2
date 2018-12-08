@@ -410,6 +410,10 @@ class DownloadDialog:
     def closeWindow(self):
         self.top.destroy()
 
+def thread_startGame(work_dir, account, wallet_seed, index):
+    t = threading.Thread(target=startGame, args=(work_dir, account, wallet_seed, index,))
+    t.start()
+
 def startGame(work_dir, account, wallet_seed, index):
     print("Starting Quake2")
         
@@ -609,7 +613,7 @@ def main():
         y = Label(root, text="Timeout")
 
     y.pack()
-    c = Button(root, text="Start Game", command=lambda: startGame(work_dir, account, wallet_seed, index))
+    c = Button(root, text="Start Game", command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
     withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed))
