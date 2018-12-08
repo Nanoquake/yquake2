@@ -434,8 +434,8 @@ def startGame(work_dir, account, wallet_seed, index):
     print("Listening on %s:%d..." % (HOST, PORT))
             
     #
-    pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
-    pc.start()
+#pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
+#    pc.start()
             
     # infinite loop
     tornado.ioloop.IOLoop.instance().start()
@@ -448,6 +448,10 @@ def exitGame():
 def update_txt(root, y, account, wallet_seed, index):
     # Process any pending blocks
     pending = nano.get_pending(str(account))
+    if pending == "timeout":
+        root.update_idletasks()
+        root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index))
+        return
 
     previous = nano.get_previous(str(account))
     if len(pending) > 0:
