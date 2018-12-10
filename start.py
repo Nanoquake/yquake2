@@ -414,6 +414,19 @@ def thread_startGame(work_dir, account, wallet_seed, index):
     t = threading.Thread(target=startGame, args=(work_dir, account, wallet_seed, index,))
     t.start()
 
+# tcp server
+    server = SimpleTcpServer(account, wallet_seed, index)
+    server.listen(PORT, HOST)
+    print("Listening on %s:%d..." % (HOST, PORT))
+    
+    #
+    #pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
+    #    pc.start()
+    
+    # infinite loop
+    tornado.ioloop.IOLoop.instance().start()
+
+
 def startGame(work_dir, account, wallet_seed, index):
     print("Starting Quake2")
         
@@ -428,17 +441,7 @@ def startGame(work_dir, account, wallet_seed, index):
             
     process = subprocess.run(full_command, shell=True)
             
-    # tcp server
-    server = SimpleTcpServer(account, wallet_seed, index)
-    server.listen(PORT, HOST)
-    print("Listening on %s:%d..." % (HOST, PORT))
-            
-    #
-#pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
-#    pc.start()
-            
-    # infinite loop
-    tornado.ioloop.IOLoop.instance().start()
+
 
 def exitGame():
     print("Shutdown Socket Server and Exit")
