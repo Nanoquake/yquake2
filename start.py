@@ -8,6 +8,7 @@ from nano25519 import ed25519_oop as ed25519
 from hashlib import blake2b
 from prompt_toolkit import prompt
 from Crypto.Cipher import AES
+import asyncio
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -205,6 +206,12 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
         self.wallet_seed = wallet_seed
         self.index = index
     
+    def run(self):
+        self.listen(PORT, HOST)
+        print("Listening on %s:%d..." % (HOST, PORT))
+        # infinite loop
+        tornado.ioloop.IOLoop.instance().start()
+    
     @tornado.gen.coroutine
     def handle_stream(self, stream, address):
         """
@@ -364,21 +371,21 @@ class DownloadDialog:
     def closeWindow(self):
         self.top.destroy()
 
+def start_server(account, wallet_seed, index):
+    # tcp server
+    server = SimpleTcpServer(account, wallet_seed, index)
+    
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    server.run()
+
 def thread_startGame(work_dir, account, wallet_seed, index):
     t = threading.Thread(target=startGame, args=(work_dir,))
     t.start()
-    new_TCP = threading.Thread(target=startTCP, args=(account, wallet_seed, index,))
-    new_TCP.start()
 
-def startTCP(account, wallet_seed, index):
-# tcp server
-    server = SimpleTcpServer(account, wallet_seed, index)
-    server.listen(PORT, HOST)
-    print("Listening on %s:%d..." % (HOST, PORT))
 
-    
-    # infinite loop
-    tornado.ioloop.IOLoop.instance().start()
+    tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index,))
+    tcp.daemon = True
+    tcp.start()
 
 
 def startGame(work_dir):
@@ -603,5 +610,5 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
-    
+
     main()
