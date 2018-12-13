@@ -32,42 +32,6 @@ def reporthook(blocknum, blocksize, totalsize):
     else: # total size is unknown
         sys.stderr.write("read %d\n" % (readsofar,))
 
-def display_qr(account):
-    data = 'xrb:' + account
-    print('Account Address: ' + account)
-    print()
-    print("Close NanoQuake Wallet QR code window when ready to process transactions...")
-    xrb_qr = pyqrcode.create(data)
-    code_xbm = xrb_qr.xbm(scale=4)
-    top = tkinter.Tk()
-    top.title("NanoQuake Wallet")
-    code_bmp = tkinter.BitmapImage(data=code_xbm)
-    code_bmp.config(background="white")
-    label = tkinter.Label(image=code_bmp)
-    label.pack()
-    textlabel = tkinter.Label(text="Close this window after scanning")
-    textlabel.pack()
-    top.mainloop()
-
-def wait_for_reply(account):
-    counter = 0
-    
-    while True:
-        pending = nano.get_pending(str(account))
-
-        if counter == 30:
-            print("\nWaited 1 minute... Going back to menu, please check if transaction went through...")
-            break
-        else:
-            if len(pending) == 0 or pending == "timeout":
-                print('.', end='', flush=True)
-                time.sleep(2)
-            else:
-                print("\nPending transaction detected")
-                break
-                    
-        counter = counter + 1
-
 def read_encrypted(password, filename, string=True):
     #https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto
     
@@ -250,16 +214,6 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
         connection = SimpleTcpClient(stream, self.account, self.wallet_seed, self.index)
         yield connection.on_connect()
 
-@tornado.gen.coroutine
-def check_account(account, wallet_seed, index):
-    #print("Check for blocks")
-    pending = nano.get_pending(str(account))
-    #print("Pending Len:" + str(len(pending)))
-    if pending != "timeout":
-        while len(pending) > 0:
-            pending = nano.get_pending(str(account))
-            nano.receive_xrb(int(index), account, wallet_seed)
-
 class PasswordDialog:
     
     def __init__(self, parent, exists):
@@ -411,23 +365,23 @@ class DownloadDialog:
         self.top.destroy()
 
 def thread_startGame(work_dir, account, wallet_seed, index):
-    t = threading.Thread(target=startGame, args=(work_dir, account, wallet_seed, index,))
+    t = threading.Thread(target=startGame, args=(work_dir,))
     t.start()
+    new_TCP = threading.Thread(target=startTCP, args=(account, wallet_seed, index,))
+    new_TCP.start()
 
+def startTCP(account, wallet_seed, index):
 # tcp server
     server = SimpleTcpServer(account, wallet_seed, index)
     server.listen(PORT, HOST)
     print("Listening on %s:%d..." % (HOST, PORT))
-    
-    #
-    #pc = tornado.ioloop.PeriodicCallback(lambda: check_account(account, wallet_seed, index), 20000)
-    #    pc.start()
+
     
     # infinite loop
     tornado.ioloop.IOLoop.instance().start()
 
 
-def startGame(work_dir, account, wallet_seed, index):
+def startGame(work_dir):
     print("Starting Quake2")
         
     game_args = "+set vid_fullscreen 0 &"
@@ -448,12 +402,13 @@ def exitGame():
     tornado.ioloop.IOLoop.instance().stop()
     sys.exit()
 
-def update_txt(root, y, account, wallet_seed, index):
+def update_txt(root, y, account, wallet_seed, index, listbox):
     # Process any pending blocks
+    print("Checking for update")
     pending = nano.get_pending(str(account))
     if pending == "timeout":
         root.update_idletasks()
-        root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index))
+        root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index, listbox))
         return
 
     previous = nano.get_previous(str(account))
@@ -464,13 +419,22 @@ def update_txt(root, y, account, wallet_seed, index):
             if pending == "timeout":
                 continue
         
-            if len(previous) == 0:
-                print("Opening Account")
-                nano.open_xrb(int(index), account, wallet_seed)
-                #We get previous after opening the account to switch it to receive rather than open
-                previous = nano.get_previous(str(account))
-            else:
-                nano.receive_xrb(int(index), account, wallet_seed)
+            try:
+                if len(previous) == 0:
+                    print("Opening Account")
+                    hash, balance = nano.open_xrb(int(index), account, wallet_seed)
+                    print("Reply {} {}".format(reply, balance))
+                    if hash != 'timeout' and hash != None:
+                        listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
+                    #We get previous after opening the account to switch it to receive rather than open
+                    previous = nano.get_previous(str(account))
+                else:
+                    hash, balance = nano.receive_xrb(int(index), account, wallet_seed)
+                    print("Reply {} {}".format(hash, balance))
+                    if hash != 'timeout' and hash != None:
+                        listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
+            except:
+                print("Error processing blocks")
 
     try:
         current_balance = nano.get_account_balance(account)
@@ -482,7 +446,7 @@ def update_txt(root, y, account, wallet_seed, index):
         y.config(text="Account Not Open")
 
     root.update_idletasks()
-    root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index))
+    root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index, listbox))
 
 def main():
     dir_path = str(Path.home())
@@ -529,7 +493,7 @@ def main():
     exists = Path(nanoquake_path + '/seedAES.txt').exists()
 
     root = Tk()
-    root.geometry("500x500")
+    root.geometry("500x700")
     w = Label(root, text="NanoQuake", bg="green", fg="black")
     w.pack(fill=X)
 
@@ -620,6 +584,10 @@ def main():
         y = Label(root, text="Timeout")
 
     y.pack()
+
+    listbox = Listbox(root)
+    listbox.pack(fill=BOTH, expand=1)
+
     c = Button(root, text="Start Game", command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
@@ -631,7 +599,7 @@ def main():
 
     root.update()
 
-    root.after(5000,lambda: update_txt(root, y, account, wallet_seed, index))
+    root.after(5000,lambda: update_txt(root, y, account, wallet_seed, index, listbox))
     root.mainloop()
 
 if __name__ == "__main__":

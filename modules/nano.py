@@ -128,6 +128,8 @@ def receive_xrb(index, account, wallet_seed):
     previous = get_previous(str(account))
 
     current_balance = get_balance(previous)
+    if current_balance == 'timeout':
+        return 'timeout'
     #print(current_balance)
     new_balance = int(current_balance) + int(balance)
     hex_balance = hex(new_balance)
@@ -140,6 +142,8 @@ def receive_xrb(index, account, wallet_seed):
 
     # print("Starting PoW Generation")
     work = get_pow(previous)
+    if work == 'timeout':
+        return 'timeout'
     # print("Completed PoW Generation")
 
     # Calculate signature
@@ -160,7 +164,7 @@ def receive_xrb(index, account, wallet_seed):
 
     data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block}, timeout=1)
     block_reply = data.json()
-    return str(balance)
+    return block_reply, balance
 
 
 def get_address(index, wallet_seed):
@@ -224,6 +228,7 @@ def open_xrb(index, account, wallet_seed):
     
     data = requests.post('https://yapraiwallet.space/quake/api', json = {"action":"process", "block" : finished_block}, timeout=1)
     block_reply = data.json()
+    return block_reply, balance
 
 
 def send_xrb(dest_account, amount, account, index, wallet_seed):
