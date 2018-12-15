@@ -1500,7 +1500,7 @@ SCR_UpdateScreen(void)
 	   up, or vid mode changing) do nothing at all */
 	if (cls.disable_screen)
 	{
-		if (Sys_Milliseconds() - cls.disable_screen > 120000)
+		if (Sys_Milliseconds() - cls.disable_screen > 30000)
 		{
 			cls.disable_screen = 0;
 			Com_Printf("Loading plaque timed out.\n");
