@@ -228,27 +228,35 @@ class PasswordDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         
+        self.exists = exists
+        
         if exists == True:
             Label(top, text="Enter Your Password").pack()
+            self.e = Entry(top, show='*')
+            self.e.pack(padx=5)
         else:
             Label(top, text="Enter New Password").pack()
         
-        self.e = Entry(top, show='*')
-        self.e.pack(padx=5)
+            self.e = Entry(top, show='*')
+            self.e.pack(padx=5)
         
-        Label(top, text="Confirm").pack()
+            Label(top, text="Confirm").pack()
         
-        self.f = Entry(top, show='*')
-        self.f.pack(padx=5)
+            self.f = Entry(top, show='*')
+            self.f.pack(padx=5)
         
         b = Button(top, text="OK", command=self.ok)
         b.pack(pady=5)
     
     def ok(self):
 
-        if self.e.get() == self.f.get():
+        if self.exists == True:
             self.password = self.e.get()
             self.top.destroy()
+        else:
+            if self.e.get() == self.f.get():
+                self.password = self.e.get()
+                self.top.destroy()
 
     def get_password(self):
         return self.password
@@ -506,46 +514,49 @@ def main():
 
     root.update()
 
-    d = PasswordDialog(root, exists)
-
-    root.wait_window(d.top)
-
-    password = d.get_password()
-
-    if exists == False:
+    while True:
         
-        wallet_seed = None
-        
-        genImpSeed = GenerateSeedDialog(root, wallet_seed)
-        root.wait_window(genImpSeed.top)
-        
-        wallet_seed = genImpSeed.get_seed()
+        d = PasswordDialog(root, exists)
+        root.wait_window(d.top)
 
-        write_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', wallet_seed)
-        priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
-        public_key = str(binascii.hexlify(pub_key), 'ascii')
-        print("Public Key: ", str(public_key))
+        password = d.get_password()
 
-        account = nano.account_xrb(str(public_key))
-        print("Account Address: ", account)
+        if exists == False:
+            
+            wallet_seed = None
+            
+            genImpSeed = GenerateSeedDialog(root, wallet_seed)
+            root.wait_window(genImpSeed.top)
+            
+            wallet_seed = genImpSeed.get_seed()
 
-        seed = wallet_seed
-
-    else:
-        print()
-        print("Seed file found")
-        print("Decoding wallet seed with your password")
-        try:
-            wallet_seed = read_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', string=True)
+            write_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', wallet_seed)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
             print("Public Key: ", str(public_key))
-        
+
             account = nano.account_xrb(str(public_key))
             print("Account Address: ", account)
-        except:
-            print('\nError decoding seed, check password and try again')
-            sys.exit()
+
+            seed = wallet_seed
+            break
+
+        else:
+            print()
+            print("Seed file found")
+            print("Decoding wallet seed with your password")
+            try:
+                wallet_seed = read_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', string=True)
+                priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
+                public_key = str(binascii.hexlify(pub_key), 'ascii')
+                print("Public Key: ", str(public_key))
+            
+                account = nano.account_xrb(str(public_key))
+                print("Account Address: ", account)
+                break
+            except:
+                print('\nError decoding seed, check password and try again')
+
 
     index = 0
     print()
