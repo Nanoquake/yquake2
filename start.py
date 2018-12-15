@@ -16,6 +16,7 @@ HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 last_pay_time = 0
+quake_running = 0
 
 pbar = None
 
@@ -118,9 +119,11 @@ class SimpleTcpClient(object):
                 split_data = line.rstrip().decode('utf8').split(",")
                 
                 if split_data[0] == "shutdown":
-                    print("Shutdown Socket Server and Exit")
-                    tornado.ioloop.IOLoop.instance().stop()
-                    sys.exit()
+                    print("Shutting down Quake")
+                    global quake_running
+                    quake_running = 0
+                    #tornado.ioloop.IOLoop.instance().stop()
+                    #sys.exit()
                 
                 elif split_data[0] == "pay_server":
                     print("Pay Nano to Server")
@@ -387,13 +390,14 @@ def start_server(account, wallet_seed, index):
     server.run()
 
 def thread_startGame(work_dir, account, wallet_seed, index):
-    t = threading.Thread(target=startGame, args=(work_dir,))
-    t.start()
-
-
-    tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index,))
-    tcp.daemon = True
-    tcp.start()
+    global quake_running
+    
+    if quake_running == 0:
+        t = threading.Thread(target=startGame, args=(work_dir,))
+        t.start()
+        quake_running = 1
+    else:
+        print("Quake already running")
 
 
 def startGame(work_dir):
@@ -615,6 +619,10 @@ def main():
     quit = Button(root, text="Exit", command=exitGame)
     quit.pack(pady=5)
 
+    tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index,))
+    tcp.daemon = True
+    tcp.start()
+    
     root.update()
 
     root.after(5000,lambda: update_txt(root, y, account, wallet_seed, index, listbox))
