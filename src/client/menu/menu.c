@@ -329,11 +329,12 @@ const char *
 Default_MenuKey(menuframework_s *m, int key)
 {
     const char *sound = NULL;
-    menucommon_s *item;
     int menu_key = Key_GetMenuKey(key);
 
     if (m)
     {
+        menucommon_s *item;
+
         if ((item = Menu_ItemAtCursor(m)) != 0)
         {
             if (item->type == MTYPE_FIELD)
@@ -433,13 +434,14 @@ M_Print(int x, int y, char *str)
     }
 }
 
+/* Unsused, left for backward compability */
 void
 M_DrawPic(int x, int y, char *pic)
 {
 	float scale = SCR_GetMenuScale();
 
-    Draw_PicScaled((x + ((viddef.width - 320) >> 1)) * scale,
-             (y + ((viddef.height - 240) >> 1)) * scale, pic, scale);
+	Draw_PicScaled((x + ((viddef.width - 320) >> 1)) * scale,
+		       (y + ((viddef.height - 240) >> 1)) * scale, pic, scale);
 }
 
 /*
@@ -530,7 +532,7 @@ static int m_popup_endtime;
 static void
 M_Popup(void)
 {
-    int x, y, width, lines;
+    int width, lines;
     int n;
     char *str;
 
@@ -569,6 +571,7 @@ M_Popup(void)
 
     if (width)
     {
+        int x, y;
         width += 2;
 
         x = (320 - (width + 2) * 8) / 2;
@@ -835,12 +838,12 @@ M_UnbindCommand(char *command)
 {
     int j;
     int l;
-    char *b;
 
     l = strlen(command);
 
     for (j = 0; j < 256; j++)
     {
+        char *b;
         b = keybindings[j];
 
         if (!b)
@@ -861,7 +864,6 @@ M_FindKeysForCommand(char *command, int *twokeys)
     int count;
     int j;
     int l;
-    char *b;
 
     twokeys[0] = twokeys[1] = -1;
     l = strlen(command);
@@ -869,6 +871,7 @@ M_FindKeysForCommand(char *command, int *twokeys)
 
     for (j = 0; j < 256; j++)
     {
+        char *b;
         b = keybindings[j];
 
         if (!b)
@@ -1474,9 +1477,10 @@ M_Menu_Video_f(void)
  * END GAME MENU
  */
 
+#define CREDITS_SIZE 256
 static int credits_start_time;
 static const char **credits;
-static char *creditsIndex[256];
+static char *creditsIndex[CREDITS_SIZE];
 static char *creditsBuffer;
 static const char *idcredits[] = {
 	"+QUAKE II BY ID SOFTWARE",
@@ -1907,7 +1911,6 @@ M_Credits_Key(int key)
 static void
 M_Menu_Credits_f(void)
 {
-    int n;
     int count;
     char *p;
 
@@ -1916,9 +1919,11 @@ M_Menu_Credits_f(void)
 
     if (count != -1)
     {
+        int n;
         p = creditsBuffer;
 
-        for (n = 0; n < 255; n++)
+        // CREDITS_SIZE - 1 - last pointer should be NULL
+        for (n = 0; n < CREDITS_SIZE - 1; n++)
         {
             creditsIndex[n] = p;
 
@@ -1946,11 +1951,14 @@ M_Menu_Credits_f(void)
 
             if (--count == 0)
             {
+                // no credits any more
+                // move one step futher for set NULL
+                n ++;
                 break;
             }
         }
 
-        creditsIndex[++n] = 0;
+        creditsIndex[n] = 0;
         credits = (const char **)creditsIndex;
     }
     else
@@ -2196,7 +2204,6 @@ static void
 LoadSave_AdjustPage(int dir)
 {
 	int i;
-	char *str;
 
 	m_loadsave_page += dir;
 
@@ -2213,6 +2220,7 @@ LoadSave_AdjustPage(int dir)
 
 	for (i = 0; i < MAX_SAVEPAGES; i++)
 	{
+		char *str;
 		str = va("%c%d%c",
 				i == m_loadsave_page ? '[' : ' ',
 				i + 1,
@@ -2666,6 +2674,7 @@ static menuaction_s s_startserver_start_action;
 static menuaction_s s_startserver_dmoptions_action;
 static menufield_s s_timelimit_field;
 static menufield_s s_fraglimit_field;
+static menufield_s s_capturelimit_field;
 static menufield_s s_maxclients_field;
 static menufield_s s_hostname_field;
 static menulist_s s_startmap_list;
@@ -2704,6 +2713,7 @@ StartServerActionFunc(void *self)
     char startmap[1024];
     float timelimit;
     float fraglimit;
+    float capturelimit;
     float maxclients;
     char *spot;
 
@@ -2712,6 +2722,12 @@ StartServerActionFunc(void *self)
     maxclients = (float)strtod(s_maxclients_field.buffer, (char **)NULL);
     timelimit = (float)strtod(s_timelimit_field.buffer, (char **)NULL);
     fraglimit = (float)strtod(s_fraglimit_field.buffer, (char **)NULL);
+
+    if (M_IsGame("ctf"))
+    {
+        capturelimit = (float)strtod(s_capturelimit_field.buffer, (char **)NULL);
+        Cvar_SetValue("capturelimit", ClampCvar(0, capturelimit, capturelimit));
+    }
 
     Cvar_SetValue("maxclients", ClampCvar(0, maxclients, maxclients));
     Cvar_SetValue("timelimit", ClampCvar(0, timelimit, timelimit));
@@ -2810,13 +2826,13 @@ StartServer_MenuInit(void)
 
     char *buffer;
     char *s;
-    int length;
-    int i;
     float scale = SCR_GetMenuScale();
 
     /* initialize list of maps once, reuse it afterwards (=> it isn't freed) */
     if (mapnames == NULL)
     {
+        int i, length;
+
         /* load the list of map names */
         if ((length = FS_LoadFile("maps.lst", (void **)&buffer)) == -1)
         {
@@ -2878,35 +2894,55 @@ StartServer_MenuInit(void)
 
     s_startmap_list.generic.type = MTYPE_SPINCONTROL;
     s_startmap_list.generic.x = 0;
-    s_startmap_list.generic.y = 0;
+
+    if (M_IsGame("ctf"))
+        s_startmap_list.generic.y = -8;
+    else
+        s_startmap_list.generic.y = 0;
+
     s_startmap_list.generic.name = "initial map";
     s_startmap_list.itemnames = (const char **)mapnames;
 
-    s_rules_box.generic.type = MTYPE_SPINCONTROL;
-    s_rules_box.generic.x = 0;
-    s_rules_box.generic.y = 20;
-    s_rules_box.generic.name = "rules";
-
-    /* Ground Zero games only available with rogue game */
-    if (M_IsGame("rogue"))
+    if (M_IsGame("ctf"))
     {
-        s_rules_box.itemnames = dm_coop_names_rogue;
+        s_capturelimit_field.generic.type = MTYPE_FIELD;
+        s_capturelimit_field.generic.name = "capture limit";
+        s_capturelimit_field.generic.flags = QMF_NUMBERSONLY;
+        s_capturelimit_field.generic.x = 0;
+        s_capturelimit_field.generic.y = 18;
+        s_capturelimit_field.generic.statusbar = "0 = no limit";
+        s_capturelimit_field.length = 3;
+        s_capturelimit_field.visible_length = 3;
+        strcpy(s_capturelimit_field.buffer, Cvar_VariableString("capturelimit"));
     }
     else
     {
-        s_rules_box.itemnames = dm_coop_names;
-    }
+        s_rules_box.generic.type = MTYPE_SPINCONTROL;
+        s_rules_box.generic.x = 0;
+        s_rules_box.generic.y = 20;
+        s_rules_box.generic.name = "rules";
 
-    if (Cvar_VariableValue("coop"))
-    {
-        s_rules_box.curvalue = 1;
-    }
-    else
-    {
-        s_rules_box.curvalue = 0;
-    }
+        /* Ground Zero games only available with rogue game */
+        if (M_IsGame("rogue"))
+        {
+            s_rules_box.itemnames = dm_coop_names_rogue;
+        }
+        else
+        {
+            s_rules_box.itemnames = dm_coop_names;
+        }
 
-    s_rules_box.generic.callback = RulesChangeFunc;
+        if (Cvar_VariableValue("coop"))
+        {
+            s_rules_box.curvalue = 1;
+        }
+        else
+        {
+            s_rules_box.curvalue = 0;
+        }
+
+        s_rules_box.generic.callback = RulesChangeFunc;
+    }
 
     s_timelimit_field.generic.type = MTYPE_FIELD;
     s_timelimit_field.generic.name = "time limit";
@@ -2976,7 +3012,12 @@ StartServer_MenuInit(void)
     s_startserver_start_action.generic.callback = StartServerActionFunc;
 
     Menu_AddItem(&s_startserver_menu, &s_startmap_list);
-    Menu_AddItem(&s_startserver_menu, &s_rules_box);
+
+    if (M_IsGame("ctf"))
+        Menu_AddItem(&s_startserver_menu, &s_capturelimit_field);
+    else
+        Menu_AddItem(&s_startserver_menu, &s_rules_box);
+
     Menu_AddItem(&s_startserver_menu, &s_timelimit_field);
     Menu_AddItem(&s_startserver_menu, &s_fraglimit_field);
     Menu_AddItem(&s_startserver_menu, &s_maxclients_field);
@@ -3190,6 +3231,21 @@ DMFlagCallback(void *self)
             bit = DF_NO_SPHERES;
         }
     }
+    else if (M_IsGame("ctf"))
+    {
+        if (f == &s_no_mines_box)
+        {
+            bit = DF_NO_MINES;          /* Equivalent to DF_CTF_FORCEJOIN in CTF */
+        }
+        else if (f == &s_no_nukes_box)
+        {
+            bit = DF_NO_NUKES;          /* Equivalent to DF_CTF_NO_TECH   in CTF */
+        }
+        else if (f == &s_stack_double_box)
+        {
+            bit = DF_NO_STACK_DOUBLE;   /* Equivalent to DF_ARMOR_PROTECT in CTF */
+        }
+    }
 
     if (f)
     {
@@ -3300,12 +3356,15 @@ DMOptions_MenuInit(void)
     s_force_respawn_box.itemnames = yes_no_names;
     s_force_respawn_box.curvalue = (dmflags & DF_FORCE_RESPAWN) != 0;
 
-    s_teamplay_box.generic.type = MTYPE_SPINCONTROL;
-    s_teamplay_box.generic.x = 0;
-    s_teamplay_box.generic.y = y += 10;
-    s_teamplay_box.generic.name = "teamplay";
-    s_teamplay_box.generic.callback = DMFlagCallback;
-    s_teamplay_box.itemnames = teamplay_names;
+    if (!M_IsGame("ctf"))
+    {
+        s_teamplay_box.generic.type = MTYPE_SPINCONTROL;
+        s_teamplay_box.generic.x = 0;
+        s_teamplay_box.generic.y = y += 10;
+        s_teamplay_box.generic.name = "teamplay";
+        s_teamplay_box.generic.callback = DMFlagCallback;
+        s_teamplay_box.itemnames = teamplay_names;
+    }
 
     s_allow_exit_box.generic.type = MTYPE_SPINCONTROL;
     s_allow_exit_box.generic.x = 0;
@@ -3339,13 +3398,16 @@ DMOptions_MenuInit(void)
     s_quad_drop_box.itemnames = yes_no_names;
     s_quad_drop_box.curvalue = (dmflags & DF_QUAD_DROP) != 0;
 
-    s_friendlyfire_box.generic.type = MTYPE_SPINCONTROL;
-    s_friendlyfire_box.generic.x = 0;
-    s_friendlyfire_box.generic.y = y += 10;
-    s_friendlyfire_box.generic.name = "friendly fire";
-    s_friendlyfire_box.generic.callback = DMFlagCallback;
-    s_friendlyfire_box.itemnames = yes_no_names;
-    s_friendlyfire_box.curvalue = (dmflags & DF_NO_FRIENDLY_FIRE) == 0;
+    if (!M_IsGame("ctf"))
+    {
+        s_friendlyfire_box.generic.type = MTYPE_SPINCONTROL;
+        s_friendlyfire_box.generic.x = 0;
+        s_friendlyfire_box.generic.y = y += 10;
+        s_friendlyfire_box.generic.name = "friendly fire";
+        s_friendlyfire_box.generic.callback = DMFlagCallback;
+        s_friendlyfire_box.itemnames = yes_no_names;
+        s_friendlyfire_box.curvalue = (dmflags & DF_NO_FRIENDLY_FIRE) == 0;
+    }
 
     if (M_IsGame("rogue"))
     {
@@ -3381,6 +3443,32 @@ DMOptions_MenuInit(void)
         s_no_spheres_box.itemnames = yes_no_names;
         s_no_spheres_box.curvalue = (dmflags & DF_NO_SPHERES) != 0;
     }
+    else if (M_IsGame("ctf"))
+    {
+        s_no_mines_box.generic.type = MTYPE_SPINCONTROL;
+        s_no_mines_box.generic.x = 0;
+        s_no_mines_box.generic.y = y += 10;
+        s_no_mines_box.generic.name = "force join";
+        s_no_mines_box.generic.callback = DMFlagCallback;
+        s_no_mines_box.itemnames = yes_no_names;
+        s_no_mines_box.curvalue = (dmflags & DF_NO_MINES) != 0;
+
+        s_stack_double_box.generic.type = MTYPE_SPINCONTROL;
+        s_stack_double_box.generic.x = 0;
+        s_stack_double_box.generic.y = y += 10;
+        s_stack_double_box.generic.name = "armor protect";
+        s_stack_double_box.generic.callback = DMFlagCallback;
+        s_stack_double_box.itemnames = yes_no_names;
+        s_stack_double_box.curvalue = (dmflags & DF_NO_STACK_DOUBLE) != 0;
+
+        s_no_nukes_box.generic.type = MTYPE_SPINCONTROL;
+        s_no_nukes_box.generic.x = 0;
+        s_no_nukes_box.generic.y = y += 10;
+        s_no_nukes_box.generic.name = "techs off";
+        s_no_nukes_box.generic.callback = DMFlagCallback;
+        s_no_nukes_box.itemnames = yes_no_names;
+        s_no_nukes_box.curvalue = (dmflags & DF_NO_NUKES) != 0;
+    }
 
     Menu_AddItem(&s_dmoptions_menu, &s_falls_box);
     Menu_AddItem(&s_dmoptions_menu, &s_weapons_stay_box);
@@ -3391,12 +3479,17 @@ DMOptions_MenuInit(void)
     Menu_AddItem(&s_dmoptions_menu, &s_spawn_farthest_box);
     Menu_AddItem(&s_dmoptions_menu, &s_samelevel_box);
     Menu_AddItem(&s_dmoptions_menu, &s_force_respawn_box);
-    Menu_AddItem(&s_dmoptions_menu, &s_teamplay_box);
+
+    if (!M_IsGame("ctf"))
+        Menu_AddItem(&s_dmoptions_menu, &s_teamplay_box);
+
     Menu_AddItem(&s_dmoptions_menu, &s_allow_exit_box);
     Menu_AddItem(&s_dmoptions_menu, &s_infinite_ammo_box);
     Menu_AddItem(&s_dmoptions_menu, &s_fixed_fov_box);
     Menu_AddItem(&s_dmoptions_menu, &s_quad_drop_box);
-    Menu_AddItem(&s_dmoptions_menu, &s_friendlyfire_box);
+
+    if (!M_IsGame("ctf"))
+        Menu_AddItem(&s_dmoptions_menu, &s_friendlyfire_box);
 
     if (M_IsGame("rogue"))
     {
@@ -3404,6 +3497,12 @@ DMOptions_MenuInit(void)
         Menu_AddItem(&s_dmoptions_menu, &s_no_nukes_box);
         Menu_AddItem(&s_dmoptions_menu, &s_stack_double_box);
         Menu_AddItem(&s_dmoptions_menu, &s_no_spheres_box);
+    }
+    else if (M_IsGame("ctf"))
+    {
+        Menu_AddItem(&s_dmoptions_menu, &s_no_mines_box);
+        Menu_AddItem(&s_dmoptions_menu, &s_stack_double_box);
+        Menu_AddItem(&s_dmoptions_menu, &s_no_nukes_box);
     }
 
     Menu_Center(&s_dmoptions_menu);
@@ -3775,7 +3874,6 @@ PlayerConfig_ScanDirectories(void)
 	for (i = 0; i < npms; i++)
 	{
 		int k, s;
-		char *a, *b, *c;
 		char **pcxnames;
 		char **skinnames;
 		fileHandle_t f;
@@ -3836,12 +3934,11 @@ PlayerConfig_ScanDirectories(void)
 		/* copy the valid skins */
 		for (s = 0, k = 0; k < npcxfiles - 1; k++)
 		{
-			char *a, *b, *c;
-
 			if (!strstr(pcxnames[k], "_i.pcx"))
 			{
 				if (IconOfSkinExists(pcxnames[k], pcxnames, npcxfiles - 1))
 				{
+					char *a, *b, *c;
 					a = strrchr(pcxnames[k], '/');
 					b = strrchr(pcxnames[k], '\\');
 
@@ -3872,23 +3969,25 @@ PlayerConfig_ScanDirectories(void)
 		s_pmi[s_numplayermodels].nskins = nskins;
 		s_pmi[s_numplayermodels].skindisplaynames = skinnames;
 
-		/* make short name for the model */
-		a = strrchr(dirnames[i], '/');
-		b = strrchr(dirnames[i], '\\');
-
-		if (a > b)
 		{
-			c = a;
+			char *a, *b, *c;
+			/* make short name for the model */
+			a = strrchr(dirnames[i], '/');
+			b = strrchr(dirnames[i], '\\');
+
+			if (a > b)
+			{
+				c = a;
+			}
+
+			else
+			{
+				c = b;
+			}
+
+			Q_strlcpy(s_pmi[s_numplayermodels].displayname, c + 1, sizeof(s_pmi[s_numplayermodels].displayname));
+			Q_strlcpy(s_pmi[s_numplayermodels].directory, c + 1, sizeof(s_pmi[s_numplayermodels].directory));
 		}
-
-		else
-		{
-			c = b;
-		}
-
-		Q_strlcpy(s_pmi[s_numplayermodels].displayname, c + 1, sizeof(s_pmi[s_numplayermodels].displayname));
-		Q_strlcpy(s_pmi[s_numplayermodels].directory, c + 1, sizeof(s_pmi[s_numplayermodels].directory));
-
 		FreeFileList(pcxnames, npcxfiles);
 
 		s_numplayermodels++;
@@ -4110,8 +4209,7 @@ static void
 PlayerConfig_MenuDraw(void)
 {
     refdef_t refdef;
-    char scratch[MAX_QPATH];
-	float scale = SCR_GetMenuScale();
+    float scale = SCR_GetMenuScale();
 
     memset(&refdef, 0, sizeof(refdef));
 
@@ -4127,6 +4225,7 @@ PlayerConfig_MenuDraw(void)
     {
         static int yaw;
         entity_t entity;
+        char scratch[MAX_QPATH];
 
         memset(&entity, 0, sizeof(entity));
 
@@ -4179,11 +4278,10 @@ PlayerConfig_MenuDraw(void)
 static const char *
 PlayerConfig_MenuKey(int key)
 {
-    int i;
-
     if (key == K_ESCAPE)
     {
         char scratch[1024];
+        int i;
 
         Cvar_Set("name", s_player_name_field.buffer);
 
@@ -4343,10 +4441,9 @@ M_Draw(void)
 void
 M_Keydown(int key)
 {
-    const char *s;
-
     if (m_keyfunc)
     {
+        const char *s;
         if ((s = m_keyfunc(key)) != 0)
         {
             S_StartLocalSound((char *)s);
