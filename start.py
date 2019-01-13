@@ -357,25 +357,25 @@ class DownloadDialog:
             shutil.copy(self.work_dir + '/demo/Install/Data/baseq2/pak0.pak', self.work_dir + '/release/baseq2/pak0.pak')
             shutil.copytree(self.work_dir + '/demo/Install/Data/baseq2/players', self.work_dir + '/release/baseq2/players')
             
-            print("Grabbing Maps")
-            if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
-                os.mkdir(self.work_dir + '/release/baseq2/maps')
+            #print("Grabbing Maps")
+            #if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
+            #    os.mkdir(self.work_dir + '/release/baseq2/maps')
             
-            print(" - q2dm1")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', self.work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
-            except:
-                print("Failed to download q2dm1")
-            print(" - ztn2dm1")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', self.work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
-            except:
-                print("Failed to download ztn2dm1")
-            print(" - tltf")
-            try:
-                urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', self.work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
-            except:
-                print("Failed to download tltf")
+            #print(" - q2dm1")
+            #try:
+            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', self.work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
+            #except:
+            #    print("Failed to download q2dm1")
+            #print(" - ztn2dm1")
+            #try:
+            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', self.work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
+            #except:
+            #    print("Failed to download ztn2dm1")
+            #print(" - tltf")
+            #try:
+            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', self.work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
+            #except:
+            #    print("Failed to download tltf")
 
         self.top.destroy()
 
