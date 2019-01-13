@@ -49,6 +49,7 @@
 
 #include "../../common/header/common.h"
 
+#include "../curl/header/download.h"
 #include "../sound/header/sound.h"
 #include "../sound/header/vorbis.h"
 #include "../vid/header/ref.h"
@@ -240,6 +241,7 @@ typedef struct
 	char		downloadname[MAX_OSPATH];
 	int			downloadnumber;
 	dltype_t	downloadtype;
+	size_t		downloadposition;
 	int			downloadpercent;
 
 	/* demo recording info must be here, so it isn't cleared on level change */
@@ -247,6 +249,15 @@ typedef struct
 	qboolean	demowaiting; /* don't record until a non-delta message is received */
 	FILE		*demofile;
 	char            server_address[256];
+
+#ifdef USE_CURL
+	/* http downloading */
+	dlqueue_t  downloadQueue; /* queues with files to download. */
+	dlhandle_t HTTPHandles[MAX_HTTP_HANDLES]; /* download handles. */
+	char	   downloadServer[512]; /* URL prefix to dowload from .*/
+	char	   downloadServerRetry[512]; /* retry count. */
+	char	   downloadReferer[32]; /* referer string. */
+#endif
 } client_static_t;
 
 extern client_static_t	cls;
@@ -432,6 +443,7 @@ void CL_GetChallengePacket (void);
 void CL_PingServers_f (void);
 void CL_Snd_Restart_f (void);
 void CL_RequestNextDownload (void);
+void CL_ResetPrecacheCheck (void);
 
 typedef struct
 {
