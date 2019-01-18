@@ -18,9 +18,6 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 last_pay_time = 0
 quake_running = 0
 
-pbar = None
-
-
 def reporthook(blocknum, blocksize, totalsize):
     readsofar = blocknum * blocksize
     if totalsize > 0:
@@ -123,8 +120,6 @@ class SimpleTcpClient(object):
                     print("Shutting down Quake")
                     global quake_running
                     quake_running = 0
-                    #tornado.ioloop.IOLoop.instance().stop()
-                    #sys.exit()
                 
                 elif split_data[0] == "pay_server":
                     print("Pay Nano to Server")
@@ -423,7 +418,8 @@ def startGame(work_dir):
     game_args = "+set vid_fullscreen 0 &"
     print(game_args)
     if platform.system() == 'Windows':
-        full_command = "start " + work_dir + "/release/yquake2 " + game_args
+        windows_work_dir = r"{}".format(work_dir)
+        full_command = "start " + windows_work_dir + "/release/yquake2 " + game_args
     else:
         full_command = work_dir + "/release/quake2 " + game_args
 
@@ -532,9 +528,10 @@ def main():
 
     root = Tk()
     root.geometry("500x700")
-    w = Label(root, text="NanoQuake", bg="blue4", fg="white")
+    w = Label(root, text="NanoQuake v1.6", bg="blue4", fg="white")
     w.pack(fill=X)
-    root.wm_title("NanoQuake")
+    root.wm_title("NanoQuake v1.6")
+    root.iconbitmap("nanoquake.ico")
 
     root.update()
 
