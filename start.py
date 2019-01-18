@@ -74,7 +74,7 @@ def send_xrb_thread(dest_account, amount, account, index, wallet_seed):
 class SimpleTcpClient(object):
     client_id = 0
   
-    def __init__(self, stream, account, wallet_seed, index):
+    def __init__(self, stream, account, wallet_seed, index, listbox):
         super().__init__()
         SimpleTcpClient.client_id += 1
         self.id = SimpleTcpClient.client_id
@@ -82,6 +82,7 @@ class SimpleTcpClient(object):
         self.account = account
         self.wallet_seed = wallet_seed
         self.index = index
+        self.listbox = listbox
         
         self.stream.socket.setsockopt(
             socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -151,6 +152,8 @@ class SimpleTcpClient(object):
                             t = threading.Thread(target=send_xrb_thread, args=(dest_account, int(amount), self.account, int(self.index), self.wallet_seed,))
                             t.start()
                             last_pay_time = time.time()
+                            self.listbox.insert(END, "{}                              {:.4} Nano".format('Pay In', Decimal(amount) / Decimal(raw_in_xrb)))
+                            self.listbox.itemconfig(END, {'bg':'coral2'})
                             return_string = "Payment Sent"
                             yield self.stream.write(return_string.encode('ascii'))
                         else:
@@ -203,11 +206,12 @@ class SimpleTcpClient(object):
 
 class SimpleTcpServer(tornado.tcpserver.TCPServer):
     
-    def __init__(self, account, wallet_seed, index):
+    def __init__(self, account, wallet_seed, index, listbox):
         super().__init__()
         self.account = account
         self.wallet_seed = wallet_seed
         self.index = index
+        self.listbox = listbox
     
     def run(self):
         self.listen(PORT, HOST)
@@ -221,7 +225,7 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
             Called for each new connection, stream.socket is
             a reference to socket object
             """
-        connection = SimpleTcpClient(stream, self.account, self.wallet_seed, self.index)
+        connection = SimpleTcpClient(stream, self.account, self.wallet_seed, self.index, self.listbox)
         yield connection.on_connect()
 
 class PasswordDialog:
@@ -266,7 +270,7 @@ class PasswordDialog:
 
 class withdrawAllDialog:
     
-    def __init__(self, parent, account, index, wallet_seed):
+    def __init__(self, parent, account, index, wallet_seed, listbox):
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
@@ -274,6 +278,7 @@ class withdrawAllDialog:
         self.account = account
         self.index = index
         self.wallet_seed = wallet_seed
+        self.listbox = listbox
 
         Label(top, text="Destination Address").pack()
         
@@ -289,6 +294,8 @@ class withdrawAllDialog:
             print("Error - timeout, try again")
         else:
             nano.send_xrb(self.withdraw_dest.get(), int(current_balance), self.account, int(self.index), self.wallet_seed)
+            self.listbox.insert(END, "{}                              {:.4} Nano".format('Withdraw', Decimal(current_balance) / Decimal(raw_in_xrb)))
+            self.listbox.itemconfig(END, {'bg':'coral2'})
         self.top.destroy()
 
 class GenerateSeedDialog:
@@ -332,16 +339,22 @@ class DownloadDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         
-        Label(top, text="Download Maps").pack()
+        Label(top, text="Download Pak Files").pack()
         
         c = Button(top, text="Yes", command=self.download)
         c.pack(pady=5)
         d = Button(top, text="No", command=self.closeWindow)
         d.pack(pady=5)
     
+        self.e = Label(top, text="Download Status")
+        self.e.pack(pady=5)
+    
     def download(self):
         if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
             print("Downloading...")
+            self.e.config(text="Downloading Demo Pak...")
+            self.top.update_idletasks()
+            
             try:
                 urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', self.work_dir + '/q2-314-demo-x86.exe', reporthook)
             except:
@@ -350,10 +363,14 @@ class DownloadDialog:
                 sys.exit()
             
             print("Download Complete, now unzipping...")
+            self.e.config(text="Download Complete, now unzipping")
+            self.e.update_idletasks()
             with zipfile.ZipFile(self.work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
                 zip_ref.extractall(self.work_dir + '/demo/')
             
             print("Copying Files")
+            self.e.config(text="Copying Files")
+            self.e.update_idletasks()
             shutil.copy(self.work_dir + '/demo/Install/Data/baseq2/pak0.pak', self.work_dir + '/release/baseq2/pak0.pak')
             shutil.copytree(self.work_dir + '/demo/Install/Data/baseq2/players', self.work_dir + '/release/baseq2/players')
             
@@ -382,9 +399,9 @@ class DownloadDialog:
     def closeWindow(self):
         self.top.destroy()
 
-def start_server(account, wallet_seed, index):
+def start_server(account, wallet_seed, index, listbox):
     # tcp server
-    server = SimpleTcpServer(account, wallet_seed, index)
+    server = SimpleTcpServer(account, wallet_seed, index, listbox)
     
     asyncio.set_event_loop(asyncio.new_event_loop())
     server.run()
@@ -445,6 +462,7 @@ def update_txt(root, y, account, wallet_seed, index, listbox):
                     print("Reply {} {}".format(reply, balance))
                     if hash != 'timeout' and hash != None:
                         listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
+                        listbox.itemconfig(END, {'bg':'spring green'})
                     #We get previous after opening the account to switch it to receive rather than open
                     previous = nano.get_previous(str(account))
                 else:
@@ -452,6 +470,7 @@ def update_txt(root, y, account, wallet_seed, index, listbox):
                     print("Reply {} {}".format(hash, balance))
                     if hash != 'timeout' and hash != None:
                         listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
+                        listbox.itemconfig(END, {'bg':'spring green'})
             except:
                 print("Error processing blocks")
 
@@ -513,8 +532,9 @@ def main():
 
     root = Tk()
     root.geometry("500x700")
-    w = Label(root, text="NanoQuake", bg="green", fg="black")
+    w = Label(root, text="NanoQuake", bg="blue4", fg="white")
     w.pack(fill=X)
+    root.wm_title("NanoQuake")
 
     root.update()
 
@@ -613,13 +633,13 @@ def main():
     c = Button(root, text="Start Game", command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
-    withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed))
+    withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
     withdraw.pack(pady=5)
     
     quit = Button(root, text="Exit", command=exitGame)
     quit.pack(pady=5)
 
-    tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index,))
+    tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index, listbox,))
     tcp.daemon = True
     tcp.start()
     
