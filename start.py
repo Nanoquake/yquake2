@@ -234,6 +234,7 @@ class PasswordDialog:
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
+        top.bind('<Return>', self.ok)
         
         self.exists = exists
         
@@ -241,21 +242,25 @@ class PasswordDialog:
             Label(top, text="Enter Your Password").pack()
             self.e = Entry(top, show='*')
             self.e.pack(padx=5)
+            self.e.focus()
+
         else:
             Label(top, text="Enter New Password").pack()
         
             self.e = Entry(top, show='*')
             self.e.pack(padx=5)
-        
+            self.e.focus()
+            
             Label(top, text="Confirm").pack()
         
             self.f = Entry(top, show='*')
             self.f.pack(padx=5)
+            self.f.focus()
         
         b = Button(top, text="OK", command=self.ok)
         b.pack(pady=5)
     
-    def ok(self):
+    def ok(self, *args):
 
         if self.exists == True:
             self.password = self.e.get()
@@ -274,6 +279,7 @@ class withdrawAllDialog:
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
+        top.bind('<Return>', self.withdraw)
         
         self.account = account
         self.index = index
@@ -284,6 +290,7 @@ class withdrawAllDialog:
         
         self.withdraw_dest = Entry(top)
         self.withdraw_dest.pack(padx=5)
+        self.withdraw_dest.focus()
         
         c = Button(top, text="OK", command=self.withdraw)
         c.pack(pady=5)
@@ -304,6 +311,7 @@ class GenerateSeedDialog:
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
+        top.bind('<Return>', self.generateSeed)
  
         self.wallet_seed = wallet_seed
         
@@ -338,6 +346,7 @@ class DownloadDialog:
         self.work_dir = work_dir
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
+        top.bind('<Return>', self.download)
         
         Label(top, text="Download Pak Files").pack()
         
