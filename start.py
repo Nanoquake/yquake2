@@ -377,7 +377,19 @@ class DownloadDialog:
             self.e.update_idletasks()
             shutil.copy(self.work_dir + '/demo/Install/Data/baseq2/pak0.pak', self.work_dir + '/release/baseq2/pak0.pak')
             shutil.copytree(self.work_dir + '/demo/Install/Data/baseq2/players', self.work_dir + '/release/baseq2/players')
-            
+        
+            if platform.system() == 'Windows':
+                print("Grabbing Curl Files")
+                try:
+                    urllib.request.urlretrieve('https://drive.google.com/open?id=1dqyiWOtgWlGTLmy3jKDu9PWJ_Ly8ZAqH', self.work_dir + '/curl.zip', reporthook)
+                    with zipfile.ZipFile(self.work_dir + '/curl.zip',"r") as zip_ref:
+                        zip_ref.extractall(self.work_dir + '/')
+                    shutil.copy(self.work_dir + '/curl/libcrypto-1_1-x64.dll', self.work_dir + '/release/libcrypto-1_1-x64.dll')
+                    shutil.copy(self.work_dir + '/curl/libcurl-x64.dll', self.work_dir + '/release/libcurl.dll')
+                    shutil.copy(self.work_dir + '/curl/libssl-1_1-x64.dll', self.work_dir + '/release/libssl-1_1-x64.dll')
+        
+                except:
+                    print("Failed to download curl files")
             #print("Grabbing Maps")
             #if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
             #    os.mkdir(self.work_dir + '/release/baseq2/maps')
