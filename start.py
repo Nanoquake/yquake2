@@ -9,7 +9,7 @@ from hashlib import blake2b
 from prompt_toolkit import prompt
 from Crypto.Cipher import AES
 import asyncio
-import gettext
+import gettext, configparser
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -19,7 +19,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 last_pay_time = 0
 quake_running = 0
 
-languages = [("English", "en"), ("French", "fr")]
+languages = [("English", "en"), ("Français", "fr"), ("Español", "es")]
 
 def reporthook(blocknum, blocksize, totalsize):
     readsofar = blocknum * blocksize
@@ -273,11 +273,12 @@ class PasswordDialog:
 
 class SelectLanguageDialog:
     
-    def __init__(self, parent):
+    def __init__(self, parent, nanoquake_path):
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.ok)
+        self.nanoquake_path = nanoquake_path
         self.lang = "None"
         
         self.v = StringVar()
@@ -292,6 +293,13 @@ class SelectLanguageDialog:
     def ok(self, *args):
 
         print(self.v.get())
+        parser = configparser.ConfigParser()
+        parser.add_section('general')
+        parser.set('general', 'language', self.v.get())
+        cfgfile = open(self.nanoquake_path + '/config.ini','w')
+        parser.write(cfgfile)
+        cfgfile.close()
+        
         self.top.destroy()
 
     def get_lang(self):
@@ -328,6 +336,60 @@ class withdrawAllDialog:
             self.listbox.insert(END, "{}                              {:.4} Nano".format('Withdraw', Decimal(current_balance) / Decimal(raw_in_xrb)))
             self.listbox.itemconfig(END, {'bg':'coral2'})
         self.top.destroy()
+
+class settingsDialog:
+    
+    def __init__(self, parent, nanoquake_path):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        top.bind('<Return>', self.close)
+
+        self.nanoquake_path = nanoquake_path
+        
+        b = Button(top, text=_("Show Disclaimer"), command=self.show_disclaimer)
+        b.pack(pady=5, padx=10)
+        c = Button(top, text=_("Show My Seed"), command=self.close)
+        c.pack(pady=5, padx=10)
+        d = Button(top, text=_("Change My Language"), command=self.change_lang)
+        d.pack(pady=5, padx=10)
+        e = Button(top, text=_("Back"), command=self.close)
+        e.pack(pady=5, padx=10)
+    
+    def close(self):
+        self.top.destroy()
+
+    def change_lang(self):
+
+        lang = SelectLanguageDialog(self.top, self.nanoquake_path)
+        self.top.wait_window(lang.top)
+    
+        selected_language = lang.get_lang()
+        print(selected_language)
+        sys.exit()
+
+    def show_disclaimer(self):
+        disclaimer = disclaimerDialog(self.top)
+        self.top.wait_window(disclaimer.top)
+
+class disclaimerDialog:
+    
+    def __init__(self, parent):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        top.bind('<Return>', self.close)
+        
+        text = Text(top, width=60, height=10)
+        text.insert('1.0', 'DISCLAIMER\n* Please ensure that you review your local laws in regards to eSports\n* NanoQuake is for persons older then 18')
+        text.pack(pady=5, padx=10)
+        text['state'] = 'disabled'
+        e = Button(top, text=_("Back"), command=self.close)
+        e.pack(pady=5, padx=10)
+    
+    def close(self):
+        self.top.destroy()
+
 
 class GenerateSeedDialog:
     
@@ -585,12 +647,21 @@ def main():
 
     root.update()
 
-    lang = SelectLanguageDialog(root)
-    root.wait_window(lang.top)
+    parser = configparser.ConfigParser()
+    config_files = parser.read(nanoquake_path + '/config.ini')
+    if len(config_files) == 0:
+        lang = SelectLanguageDialog(root, nanoquake_path)
+        root.wait_window(lang.top)
+        selected_language = lang.get_lang()
+        print(selected_language)
+        parser.add_section('general')
+        parser.set('general', 'language', selected_language)
+        cfgfile = open(nanoquake_path + '/config.ini','w')
+        parser.write(cfgfile)
+        cfgfile.close()
 
-    selected_language = lang.get_lang()
+    selected_language = parser.get('general', 'language')
     print(selected_language)
-
     lang1 = gettext.translation('nanoquake', localedir='locale', languages=[selected_language])
     lang1.install()
 
@@ -691,7 +762,10 @@ def main():
  
     withdraw = Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
     withdraw.pack(pady=5)
-    
+
+    settings = Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path))
+    settings.pack(pady=5)
+
     quit = Button(root, text=_("Exit"), command=exitGame)
     quit.pack(pady=5)
 
