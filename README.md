@@ -1,5 +1,8 @@
 # NanoQuake
-See Wiki for more information
+See [Wiki](https://github.com/Nanoquake/yquake2/wiki) for more information
+
+NanoQuake is based on Yamagi Quake II (see below)
+
 =======
 # Yamagi Quake II
 
