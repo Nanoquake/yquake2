@@ -10,6 +10,7 @@ from prompt_toolkit import prompt
 from Crypto.Cipher import AES
 import asyncio
 import gettext, configparser
+from tkinter.messagebox import showinfo
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -339,17 +340,18 @@ class withdrawAllDialog:
 
 class settingsDialog:
     
-    def __init__(self, parent, nanoquake_path):
+    def __init__(self, parent, nanoquake_path, wallet_seed):
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
 
         self.nanoquake_path = nanoquake_path
+        self.wallet_seed = wallet_seed
         
         b = Button(top, text=_("Show Disclaimer"), command=self.show_disclaimer)
         b.pack(pady=5, padx=10)
-        c = Button(top, text=_("Show My Seed"), command=self.close)
+        c = Button(top, text=_("Show My Seed"), command=self.show_seed)
         c.pack(pady=5, padx=10)
         d = Button(top, text=_("Change My Language"), command=self.change_lang)
         d.pack(pady=5, padx=10)
@@ -358,6 +360,9 @@ class settingsDialog:
     
     def close(self):
         self.top.destroy()
+    
+    def show_seed(self):
+        showinfo("NanoQuake", self.wallet_seed)
 
     def change_lang(self):
 
@@ -381,7 +386,7 @@ class disclaimerDialog:
         top.bind('<Return>', self.close)
         
         text = Text(top, width=60, height=10)
-        text.insert('1.0', 'DISCLAIMER\n* Please ensure that you review your local laws in regards to eSports\n* NanoQuake is for persons older then 18')
+        text.insert('1.0', _('DISCLAIMER\n* Please ensure that you review your local laws in regards to eSports\n* NanoQuake is for persons older then 18'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
         e = Button(top, text=_("Back"), command=self.close)
@@ -763,7 +768,7 @@ def main():
     withdraw = Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
     withdraw.pack(pady=5)
 
-    settings = Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path))
+    settings = Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
     settings.pack(pady=5)
 
     quit = Button(root, text=_("Exit"), command=exitGame)
