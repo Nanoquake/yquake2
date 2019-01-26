@@ -9,6 +9,7 @@ from hashlib import blake2b
 from prompt_toolkit import prompt
 from Crypto.Cipher import AES
 import asyncio
+import gettext
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -17,6 +18,8 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 last_pay_time = 0
 quake_running = 0
+
+languages = [("English", "en"), ("French", "fr")]
 
 def reporthook(blocknum, blocksize, totalsize):
     readsofar = blocknum * blocksize
@@ -45,7 +48,7 @@ def read_encrypted(password, filename, string=True):
         ciphertext = input.read()
         plaintext = decryptor.decrypt(ciphertext)
         if len(plaintext) != 64:
-            print("Error - empty seed, please delete your seedAES.txt and start again")
+            print(_("Error - empty seed, please delete your seedAES.txt and start again"))
             sys.exit()
         if string:
             return plaintext.decode('utf8')
@@ -117,12 +120,12 @@ class SimpleTcpClient(object):
                 split_data = line.rstrip().decode('utf8').split(",")
                 
                 if split_data[0] == "shutdown":
-                    print("Shutting down Quake")
+                    print(_("Shutting down Quake"))
                     global quake_running
                     quake_running = 0
                 
                 elif split_data[0] == "pay_server":
-                    print("Pay Nano to Server")
+                    print(_("Pay Nano to Server"))
                     global last_pay_time
                     dest_account = 'xrb_' + split_data[1]
                     amount = str(server_payin)
@@ -137,10 +140,10 @@ class SimpleTcpClient(object):
 
 
                         if current_balance == 'Empty' or current_balance == '':
-                            return_string = "Error - empty balance"
+                            return_string = _("Error - empty balance")
                             yield self.stream.write(return_string.encode('ascii'))
                         elif current_balance == 'timeout':
-                            return_string = "Error - timeout checking balance"
+                            return_string = _("Error - timeout checking balance")
                             yield self.stream.write(return_string.encode('ascii'))
                         
                         if int(current_balance) >= server_payin:
@@ -149,20 +152,20 @@ class SimpleTcpClient(object):
                             last_pay_time = time.time()
                             self.listbox.insert(END, "{}                              {:.4} Nano".format('Pay In', Decimal(amount) / Decimal(raw_in_xrb)))
                             self.listbox.itemconfig(END, {'bg':'coral2'})
-                            return_string = "Payment Sent"
+                            return_string = _("Payment Sent")
                             yield self.stream.write(return_string.encode('ascii'))
                         else:
-                            print("Error - insufficient funds")
-                            return_string = "Error insufficent funds"
+                            print(_("Error - insufficient funds"))
+                            return_string = _("Error insufficent funds")
                             yield self.stream.write(return_string.encode('ascii'))
                     else:
-                        print("Last pay in less that 30 seconds ago")
-                        return_string = "Last pay in less that 30 seconds ago"
+                        print(_("Last pay in less that 30 seconds ago"))
+                        return_string = _("Last pay in less that 30 seconds ago")
                         yield self.stream.write(return_string.encode('ascii'))
 
 
                 elif split_data[0] == "balance":
-                    print("Nano Balance")
+                    print(_("Nano Balance"))
                     new_balance = 'Empty'
                     try:
                         current_balance = nano.get_account_balance(self.account)
@@ -171,9 +174,9 @@ class SimpleTcpClient(object):
                         pass
 
                     if current_balance == 'Empty':
-                        return_string = "Error - empty balance"
+                        return_string = _("Error - empty balance")
                     elif current_balance == 'timeout':
-                        return_string = "Error - timeout checking balance"
+                        return_string = _("Error - timeout checking balance")
                     else:
                         new_balance = Decimal(current_balance) / Decimal(raw_in_xrb)
                         print("Balance: {:.5}".format(new_balance))
@@ -210,7 +213,7 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
     
     def run(self):
         self.listen(PORT, HOST)
-        print("Listening on %s:%d..." % (HOST, PORT))
+        print(_("Listening on %s:%d...") % (HOST, PORT))
         # infinite loop
         tornado.ioloop.IOLoop.instance().start()
     
@@ -234,25 +237,25 @@ class PasswordDialog:
         self.exists = exists
         
         if exists == True:
-            Label(top, text="Enter Your Password").pack()
+            Label(top, text=_("Enter Your Password")).pack()
             self.e = Entry(top, show='*')
             self.e.pack(padx=5)
             self.e.focus()
 
         else:
-            Label(top, text="Enter New Password").pack()
+            Label(top, text=_("Enter New Password")).pack()
         
             self.e = Entry(top, show='*')
             self.e.pack(padx=5)
             self.e.focus()
             
-            Label(top, text="Confirm").pack()
+            Label(top, text=_("Confirm")).pack()
         
             self.f = Entry(top, show='*')
             self.f.pack(padx=5)
             self.f.focus()
         
-        b = Button(top, text="OK", command=self.ok)
+        b = Button(top, text=_("OK"), command=self.ok)
         b.pack(pady=5)
     
     def ok(self, *args):
@@ -268,6 +271,32 @@ class PasswordDialog:
     def get_password(self):
         return self.password
 
+class SelectLanguageDialog:
+    
+    def __init__(self, parent):
+        
+        top = self.top = Toplevel(parent)
+        top.title("NanoQuake")
+        top.bind('<Return>', self.ok)
+        self.lang = "None"
+        
+        self.v = StringVar()
+        self.v.set("none") # initialize
+        
+        for lang, lang_code in languages:
+            a = Radiobutton(top, text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20)
+        
+        b = Button(top, text="OK", command=self.ok)
+        b.pack(pady=5, padx=5)
+
+    def ok(self, *args):
+
+        print(self.v.get())
+        self.top.destroy()
+
+    def get_lang(self):
+        return self.v.get()
+
 class withdrawAllDialog:
     
     def __init__(self, parent, account, index, wallet_seed, listbox):
@@ -281,19 +310,19 @@ class withdrawAllDialog:
         self.wallet_seed = wallet_seed
         self.listbox = listbox
 
-        Label(top, text="Destination Address").pack()
+        Label(top, text=_("Destination Address")).pack()
         
         self.withdraw_dest = Entry(top)
         self.withdraw_dest.pack(padx=5)
         self.withdraw_dest.focus()
         
-        c = Button(top, text="OK", command=self.withdraw)
+        c = Button(top, text=_("OK"), command=self.withdraw)
         c.pack(pady=5)
     
     def withdraw(self):
         current_balance = nano.get_account_balance(self.account)
         if current_balance == "timeout":
-            print("Error - timeout, try again")
+            print(_("Error - timeout, try again"))
         else:
             nano.send_xrb(self.withdraw_dest.get(), int(current_balance), self.account, int(self.index), self.wallet_seed)
             self.listbox.insert(END, "{}                              {:.4} Nano".format('Withdraw', Decimal(current_balance) / Decimal(raw_in_xrb)))
@@ -310,21 +339,21 @@ class GenerateSeedDialog:
  
         self.wallet_seed = wallet_seed
         
-        generate = Button(top, text="Generate New Seed", command=self.generateSeed)
+        generate = Button(top, text=_("Generate New Seed"), command=self.generateSeed)
         generate.pack(pady=5)
         
-        Label(top, text="Import Seed").pack()
+        Label(top, text=_("Import Seed")).pack()
         
         self.import_seed = Entry(top)
         self.import_seed.pack(padx=5)
         
-        c = Button(top, text="OK", command=self.import_func)
+        c = Button(top, text=_("OK"), command=self.import_func)
         c.pack(pady=5)
     
     def generateSeed(self):
         full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
         self.wallet_seed = full_wallet_seed[2:].upper()
-        print("Wallet Seed (make a copy of this in a safe place!): {}".format(self.wallet_seed))
+        print(_("Wallet Seed (make a copy of this in a safe place!): {}").format(self.wallet_seed))
         self.top.destroy()
     
     def import_func(self):
@@ -343,43 +372,43 @@ class DownloadDialog:
         top.title("NanoQuake")
         top.bind('<Return>', self.download)
         
-        Label(top, text="Download Pak Files").pack()
+        Label(top, text=_("Download Pak Files")).pack()
         
-        c = Button(top, text="Yes", command=self.download)
+        c = Button(top, text=_("Yes"), command=self.download)
         c.pack(pady=5)
-        d = Button(top, text="No", command=self.closeWindow)
+        d = Button(top, text=_("No"), command=self.closeWindow)
         d.pack(pady=5)
     
-        self.e = Label(top, text="Download Status")
+        self.e = Label(top, text=_("Download Status"))
         self.e.pack(pady=5)
     
     def download(self):
         if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
-            print("Downloading...")
-            self.e.config(text="Downloading Demo Pak...")
-            self.top.update_idletasks()
+            print(_("Downloading..."))
+            self.e.config(text=_("Downloading Demo Pak..."))
+            self.top.update()
             
             try:
                 urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', self.work_dir + '/q2-314-demo-x86.exe', reporthook)
             except:
-                print("Failed to download demo files")
+                print(_("Failed to download demo files"))
                 time.sleep(5)
                 sys.exit()
             
-            print("Download Complete, now unzipping...")
-            self.e.config(text="Download Complete, now unzipping")
-            self.e.update_idletasks()
+            print(_("Download Complete, now unzipping..."))
+            self.e.config(text=_("Download Complete, now unzipping"))
+            self.e.update()
             with zipfile.ZipFile(self.work_dir + '/q2-314-demo-x86.exe',"r") as zip_ref:
                 zip_ref.extractall(self.work_dir + '/demo/')
             
-            print("Copying Files")
-            self.e.config(text="Copying Files")
-            self.e.update_idletasks()
+            print(_("Copying Files"))
+            self.e.config(text=_("Copying Files"))
+            self.e.update()
             shutil.copy(self.work_dir + '/demo/Install/Data/baseq2/pak0.pak', self.work_dir + '/release/baseq2/pak0.pak')
             shutil.copytree(self.work_dir + '/demo/Install/Data/baseq2/players', self.work_dir + '/release/baseq2/players')
 
             if platform.system() == 'Windows':
-                print("Grabbing Curl Files")
+                print(_("Grabbing Curl Files"))
                 try:
                      with zipfile.ZipFile(self.work_dir + '/curl.zip',"r") as zip_ref:
                         zip_ref.extractall(self.work_dir + '/curl/')
@@ -387,7 +416,7 @@ class DownloadDialog:
                      shutil.copy(self.work_dir + '/curl/libcurl-x64.dll', self.work_dir + '/release/libcurl.dll')
                      shutil.copy(self.work_dir + '/curl/libssl-1_1-x64.dll', self.work_dir + '/release/libssl-1_1-x64.dll')
                 except:
-                    print("Failed to download curl files")
+                    print(_("Failed to download curl files"))
             #print("Grabbing Maps")
             #if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
             #    os.mkdir(self.work_dir + '/release/baseq2/maps')
@@ -428,11 +457,12 @@ def thread_startGame(work_dir, account, wallet_seed, index):
         t.start()
         quake_running = 1
     else:
-        print("Quake already running")
+        print(_("Quake already running"))
+
 
 
 def startGame(work_dir):
-    print("Starting Quake2")
+    print(_("Starting Quake2"))
         
     game_args = "+set vid_fullscreen 0 &"
     print(game_args)
@@ -449,13 +479,13 @@ def startGame(work_dir):
 
 
 def exitGame():
-    print("Shutdown Socket Server and Exit")
+    print(_("Shutdown Socket Server and Exit"))
     tornado.ioloop.IOLoop.instance().stop()
     sys.exit()
 
 def update_txt(root, y, account, wallet_seed, index, listbox):
     # Process any pending blocks
-    print("Checking for update")
+    print(_("Checking for update"))
     pending = nano.get_pending(str(account))
     if pending == "timeout":
         root.update_idletasks()
@@ -464,7 +494,7 @@ def update_txt(root, y, account, wallet_seed, index, listbox):
 
     previous = nano.get_previous(str(account))
     if len(pending) > 0:
-        print("Processing...")
+        print(_("Processing..."))
         while len(pending) > 0:
             pending = nano.get_pending(str(account))
             if pending == "timeout":
@@ -472,9 +502,9 @@ def update_txt(root, y, account, wallet_seed, index, listbox):
         
             try:
                 if len(previous) == 0:
-                    print("Opening Account")
+                    print(_("Opening Account"))
                     hash, balance = nano.open_xrb(int(index), account, wallet_seed)
-                    print("Reply {} {}".format(reply, balance))
+                    print(_("Reply {} {}").format(reply, balance))
                     if hash != 'timeout' and hash != None:
                         listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
                         listbox.itemconfig(END, {'bg':'spring green'})
@@ -482,26 +512,27 @@ def update_txt(root, y, account, wallet_seed, index, listbox):
                     previous = nano.get_previous(str(account))
                 else:
                     hash, balance = nano.receive_xrb(int(index), account, wallet_seed)
-                    print("Reply {} {}".format(hash, balance))
+                    print(_("Reply {} {}").format(hash, balance))
                     if hash != 'timeout' and hash != None:
                         listbox.insert(END, "{}... {:.4} Nano".format(hash['hash'][:24], Decimal(balance) / Decimal(raw_in_xrb)))
                         listbox.itemconfig(END, {'bg':'spring green'})
             except:
-                print("Error processing blocks")
+                print(_("Error processing blocks"))
 
     try:
         current_balance = nano.get_account_balance(account)
         if current_balance != "timeout":
             y.config(text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
         else:
-            y.config(text="Timeout")
+            y.config(text=_("Timeout"))
     except:
-        y.config(text="Account Not Open")
+        y.config(text=_("Account Not Open"))
 
     root.update_idletasks()
     root.after(5000, lambda: update_txt(root, y, account, wallet_seed, index, listbox))
 
 def main():
+    
     dir_path = str(Path.home())
     print("Starting NanoQuake2...")
     print()
@@ -554,6 +585,15 @@ def main():
 
     root.update()
 
+    lang = SelectLanguageDialog(root)
+    root.wait_window(lang.top)
+
+    selected_language = lang.get_lang()
+    print(selected_language)
+
+    lang1 = gettext.translation('nanoquake', localedir='locale', languages=[selected_language])
+    lang1.install()
+
     while True:
         
         d = PasswordDialog(root, exists)
@@ -573,26 +613,26 @@ def main():
             write_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', wallet_seed)
             priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
             public_key = str(binascii.hexlify(pub_key), 'ascii')
-            print("Public Key: ", str(public_key))
+            print(_("Public Key: "), str(public_key))
 
             account = nano.account_xrb(str(public_key))
-            print("Account Address: ", account)
+            print(_("Account Address: "), account)
 
             seed = wallet_seed
             break
 
         else:
             print()
-            print("Seed file found")
-            print("Decoding wallet seed with your password")
+            print(_("Seed file found"))
+            print(_("Decoding wallet seed with your password"))
             try:
                 wallet_seed = read_encrypted(password.encode('utf8'), nanoquake_path + '/seedAES.txt', string=True)
                 priv_key, pub_key = nano.seed_account(str(wallet_seed), 0)
                 public_key = str(binascii.hexlify(pub_key), 'ascii')
-                print("Public Key: ", str(public_key))
+                print(_("Public Key: "), str(public_key))
             
                 account = nano.account_xrb(str(public_key))
-                print("Account Address: ", account)
+                print(_("Account Address: "), account)
                 break
             except:
                 print('\nError decoding seed, check password and try again')
@@ -600,16 +640,16 @@ def main():
 
     index = 0
     print()
-    print("This is your game account address: {}".format(account))
+    print(_("This is your game account address: {}").format(account))
     current_balance = nano.get_account_balance(account)
     if current_balance != "timeout":
-        print("\nBalance: {:.3} Nano\n".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        print(_("\nBalance: {:.3} Nano\n").format(Decimal(current_balance) / Decimal(raw_in_xrb)))
 
     r = nano.get_rates()
     if r != "timeout":
 
         print()
-        print("NANO Rates")
+        print(_("NANO Rates"))
         print("- $:",r.json()['NANO']['USD'])
         print("- £:",r.json()['NANO']['GBP'])
         print("- €:",r.json()['NANO']['EUR'])
@@ -627,32 +667,32 @@ def main():
     label = Label(root, image=code_bmp)
     label.pack()
     
-    w = Label(root, text="Your Game Account: ")
+    w = Label(root, text=_("Your Game Account: "))
     w.pack()
     data_string = StringVar()
     data_string.set(account)
     w = Entry(root, textvariable=data_string, fg="black", bg="white", bd=0, state="readonly")
     w.pack()
     w.pack(fill=X)
-    y = Label(root, text="Your Balance: ")
+    y = Label(root, text=_("Your Balance: "))
     y.pack()
     if current_balance != "timeout":
         y = Label(root, text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
-        y = Label(root, text="Timeout")
+        y = Label(root, text=_("Timeout"))
 
     y.pack()
 
     listbox = Listbox(root)
     listbox.pack(fill=BOTH, expand=1)
 
-    c = Button(root, text="Start Game", command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
+    c = Button(root, text=_("Start Game"), command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
-    withdraw = Button(root, text="Withdraw All", command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
+    withdraw = Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
     withdraw.pack(pady=5)
     
-    quit = Button(root, text="Exit", command=exitGame)
+    quit = Button(root, text=_("Exit"), command=exitGame)
     quit.pack(pady=5)
 
     tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index, listbox,))

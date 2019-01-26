@@ -1,0 +1,267 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-01-26 13:01+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: start.py:48
+msgid "Error - empty seed, please delete your seedAES.txt and start again"
+msgstr ""
+
+#: start.py:120
+msgid "Shutting down Quake"
+msgstr ""
+
+#: start.py:125
+msgid "Pay Nano to Server"
+msgstr ""
+
+#: start.py:140 start.py:174
+msgid "Error - empty balance"
+msgstr ""
+
+#: start.py:143 start.py:176
+msgid "Error - timeout checking balance"
+msgstr ""
+
+#: start.py:152
+msgid "Payment Sent"
+msgstr ""
+
+#: start.py:155
+msgid "Error - insufficient funds"
+msgstr ""
+
+#: start.py:156
+msgid "Error insufficent funds"
+msgstr ""
+
+#: start.py:159 start.py:160
+msgid "Last pay in less that 30 seconds ago"
+msgstr ""
+
+#: start.py:165
+msgid "Nano Balance"
+msgstr ""
+
+#: start.py:213
+msgid "Listening on %s:%d..."
+msgstr ""
+
+#: start.py:237
+msgid "Enter Your Password"
+msgstr ""
+
+#: start.py:243
+msgid "Enter New Password"
+msgstr ""
+
+#: start.py:249
+msgid "Confirm"
+msgstr ""
+
+#: start.py:255 start.py:290 start.py:321
+msgid "OK"
+msgstr ""
+
+#: start.py:284
+msgid "Destination Address"
+msgstr ""
+
+#: start.py:296
+msgid "Error - timeout, try again"
+msgstr ""
+
+#: start.py:313
+msgid "Generate New Seed"
+msgstr ""
+
+#: start.py:316
+msgid "Import Seed"
+msgstr ""
+
+#: start.py:327
+msgid "Wallet Seed (make a copy of this in a safe place!): {}"
+msgstr ""
+
+#: start.py:346
+msgid "Download Pak Files"
+msgstr ""
+
+#: start.py:348
+msgid "Yes"
+msgstr ""
+
+#: start.py:350
+msgid "No"
+msgstr ""
+
+#: start.py:353
+msgid "Download Status"
+msgstr ""
+
+#: start.py:358
+msgid "Downloading..."
+msgstr ""
+
+#: start.py:359
+msgid "Downloading Demo Pak..."
+msgstr ""
+
+#: start.py:365
+msgid "Failed to download demo files"
+msgstr ""
+
+#: start.py:369
+msgid "Download Complete, now unzipping..."
+msgstr ""
+
+#: start.py:370
+msgid "Download Complete, now unzipping"
+msgstr ""
+
+#: start.py:375 start.py:376
+msgid "Copying Files"
+msgstr ""
+
+#: start.py:382
+msgid "Grabbing Curl Files"
+msgstr ""
+
+#: start.py:390
+msgid "Failed to download curl files"
+msgstr ""
+
+#: start.py:431
+msgid "Quake already running"
+msgstr ""
+
+#: start.py:436
+msgid "Starting Quake2"
+msgstr ""
+
+#: start.py:453
+msgid "Shutdown Socket Server and Exit"
+msgstr ""
+
+#: start.py:459
+msgid "Checking for update"
+msgstr ""
+
+#: start.py:468
+msgid "Processing..."
+msgstr ""
+
+#: start.py:476
+msgid "Opening Account"
+msgstr ""
+
+#: start.py:478 start.py:486
+msgid "Reply {} {}"
+msgstr ""
+
+#: start.py:491
+msgid "Error processing blocks"
+msgstr ""
+
+#: start.py:498 start.py:643
+msgid "Timeout"
+msgstr ""
+
+#: start.py:500
+msgid "Account Not Open"
+msgstr ""
+
+#: start.py:507
+msgid "Starting NanoQuake2..."
+msgstr ""
+
+#: start.py:509
+msgid "Current Dir: {}"
+msgstr ""
+
+#: start.py:510
+msgid "System: {}"
+msgstr ""
+
+#: start.py:519
+msgid "Work Dir: {}"
+msgstr ""
+
+#: start.py:525 start.py:532
+msgid "Making a new config directory"
+msgstr ""
+
+#: start.py:537
+msgid "Error - system not recognised"
+msgstr ""
+
+#: start.py:541
+msgid "Config Directory: {}"
+msgstr ""
+
+#: start.py:545
+msgid "Old seed file detected, as encryption has been upgraded please import your old seed, you can extract it with the decodeOldseed.py script"
+msgstr ""
+
+#: start.py:577 start.py:593
+msgid "Public Key: "
+msgstr ""
+
+#: start.py:580 start.py:596
+msgid "Account Address: "
+msgstr ""
+
+#: start.py:587
+msgid "Seed file found"
+msgstr ""
+
+#: start.py:588
+msgid "Decoding wallet seed with your password"
+msgstr ""
+
+#: start.py:604
+msgid "This is your game account address: {}"
+msgstr ""
+
+#: start.py:607
+msgid ""
+"\n"
+"Balance: {:.3} Nano\n"
+msgstr ""
+
+#: start.py:613
+msgid "NANO Rates"
+msgstr ""
+
+#: start.py:631
+msgid "Your Game Account: "
+msgstr ""
+
+#: start.py:638
+msgid "Your Balance: "
+msgstr ""
+
+#: start.py:650
+msgid "Start Game"
+msgstr ""
+
+#: start.py:653
+msgid "Withdraw All"
+msgstr ""
+
+#: start.py:656
+msgid "Exit"
+msgstr ""
+
