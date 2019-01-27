@@ -371,7 +371,7 @@ class settingsDialog:
     
         selected_language = lang.get_lang()
         print(selected_language)
-        showinfo("NanoQuake", "Restarting with new settings")
+        showinfo("NanoQuake", _("Restarting with new settings"))
         sys.exit()
 
     def show_disclaimer(self):
@@ -386,8 +386,8 @@ class disclaimerDialog:
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
         
-        text = Text(top, width=60, height=10)
-        text.insert('1.0', _('DISCLAIMER\n* Please ensure that you review your local laws in regards to eSports\n* NanoQuake is for persons older then 18'))
+        text = Text(top, width=62, height=10)
+        text.insert('1.0', _('DISCLAIMER\n* Please ensure that you review your local laws in regards to online eSports\n* NanoQuake is for persons older then 18'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
         e = Button(top, text=_("Back"), command=self.close)
@@ -655,6 +655,7 @@ def main():
 
     parser = configparser.ConfigParser()
     config_files = parser.read(nanoquake_path + '/config.ini')
+
     if len(config_files) == 0:
         lang = SelectLanguageDialog(root, nanoquake_path)
         root.wait_window(lang.top)
@@ -662,15 +663,34 @@ def main():
         print(selected_language)
         parser.add_section('general')
         parser.set('general', 'language', selected_language)
+        
         cfgfile = open(nanoquake_path + '/config.ini','w')
         parser.write(cfgfile)
         cfgfile.close()
 
     selected_language = parser.get('general', 'language')
     print(selected_language)
-    lang1 = gettext.translation('nanoquake', localedir='locale', languages=[selected_language])
-    lang1.install()
+    localedirectory = work_dir + '/locale'
+    try:
+        lang1 = gettext.translation('nanoquake', localedir=localedirectory, languages=[selected_language])
+        lang1.install()
+    except:
+        print("Error - not able to locate translation files, back to default")
 
+    try:
+        disclaimer_bool = parser.get('general', 'disclaimer')
+    except:
+        disclaimer_bool = "False"
+
+    if disclaimer_bool != "True":
+        disclaimer = disclaimerDialog(root)
+        root.wait_window(disclaimer.top)
+        parser.set('general', 'disclaimer', "True")
+        
+        cfgfile = open(nanoquake_path + '/config.ini','w')
+        parser.write(cfgfile)
+        cfgfile.close()
+    
     while True:
         
         d = PasswordDialog(root, exists)
