@@ -387,7 +387,7 @@ class disclaimerDialog:
         top.bind('<Return>', self.close)
         
         text = Text(top, width=62, height=10)
-        text.insert('1.0', _('DISCLAIMER\n* Please ensure that you review your local laws in regards to online eSports\n* NanoQuake is for persons older then 18'))
+        text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game.'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
         e = Button(top, text=_("Back"), command=self.close)
@@ -535,8 +535,7 @@ def startGame(work_dir):
     game_args = "+set vid_fullscreen 0 &"
     print(game_args)
     if platform.system() == 'Windows':
-        windows_work_dir = r'""{}""'.format(work_dir)
-        full_command = "start " + windows_work_dir + "/release/yquake2 " + game_args
+        full_command = r"start .{} &".format("\\release\yquake2.exe")
     else:
         full_command = work_dir + "/release/quake2 " + game_args
 
