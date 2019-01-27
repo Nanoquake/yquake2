@@ -20,7 +20,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 last_pay_time = 0
 quake_running = 0
 
-languages = [("English", "en"), ("Français", "fr"), ("Español", "es")]
+languages = [("English", "en"), ("Français", "fr"), ("Español", "es"), ("bahasa Indonesia", "id")]
 
 def reporthook(blocknum, blocksize, totalsize):
     readsofar = blocknum * blocksize
@@ -371,6 +371,7 @@ class settingsDialog:
     
         selected_language = lang.get_lang()
         print(selected_language)
+        showinfo("NanoQuake", "Restarting with new settings")
         sys.exit()
 
     def show_disclaimer(self):

@@ -1,0 +1,275 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2019-01-26 13:01+0000\n"
+"PO-Revision-Date: 2019-01-27 07:35+0000\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.2.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: id\n"
+
+#: start.py:48
+msgid "Error - empty seed, please delete your seedAES.txt and start again"
+msgstr "Error- seed kosong, silahkan hapus seedAES,txt dan mulai lagi"
+
+#: start.py:120
+msgid "Shutting down Quake"
+msgstr "Mematikan Quake"
+
+#: start.py:125
+msgid "Pay Nano to Server"
+msgstr "Membayar Nano untuk server"
+
+#: start.py:140 start.py:174
+msgid "Error - empty balance"
+msgstr "Error - saldo kosong"
+
+#: start.py:143 start.py:176
+msgid "Error - timeout checking balance"
+msgstr "Error – batas waktu memeriksa saldo"
+
+#: start.py:152
+msgid "Payment Sent"
+msgstr "Pembayaran terkirim"
+
+#: start.py:155
+msgid "Error - insufficient funds"
+msgstr "Error – saldo tidak mencukupi"
+
+#: start.py:156
+msgid "Error insufficent funds"
+msgstr "Error saldo tidak mencukupi"
+
+#: start.py:159 start.py:160
+msgid "Last pay in less that 30 seconds ago"
+msgstr "Pembayaran terakhir dalam waktu kurang dari 30 detik yang lalu"
+
+#: start.py:165
+msgid "Nano Balance"
+msgstr "Saldo Nano"
+
+#: start.py:213
+msgid "Listening on %s:%d..."
+msgstr "Mendengarkan pada %s:%d…"
+
+#: start.py:237
+msgid "Enter Your Password"
+msgstr "Masukkan kata sandi anda"
+
+#: start.py:243
+msgid "Enter New Password"
+msgstr "Masukkan kata sandi baru"
+
+#: start.py:249
+msgid "Confirm"
+msgstr "Konfirmasi"
+
+#: start.py:255 start.py:290 start.py:321
+msgid "OK"
+msgstr "OK"
+
+#: start.py:284
+msgid "Destination Address"
+msgstr "Alamat tujuan"
+
+#: start.py:296
+msgid "Error - timeout, try again"
+msgstr "Error -  Waktu habis, coba lagi"
+
+#: start.py:313
+msgid "Generate New Seed"
+msgstr "Menghasilkan Seed baru"
+
+#: start.py:316
+msgid "Import Seed"
+msgstr "Impor Seed"
+
+#: start.py:327
+msgid "Wallet Seed (make a copy of this in a safe place!): {}"
+msgstr "Wallet Seed (buat salinan ini di tempat yang aman!): {}"
+
+#: start.py:346
+msgid "Download Pak Files"
+msgstr "Download Pak file"
+
+#: start.py:348
+msgid "Yes"
+msgstr "Ya"
+
+#: start.py:350
+msgid "No"
+msgstr "Tidak"
+
+#: start.py:353
+msgid "Download Status"
+msgstr "Download status"
+
+#: start.py:358
+msgid "Downloading..."
+msgstr "Sedang mendownload…"
+
+#: start.py:359
+msgid "Downloading Demo Pak..."
+msgstr "Sedang mendownload Demo Pak…"
+
+#: start.py:365
+msgid "Failed to download demo files"
+msgstr "Gagal untuk download demo file"
+
+#: start.py:369
+msgid "Download Complete, now unzipping..."
+msgstr "Download selesai, sekarang unzip…"
+
+#: start.py:370
+msgid "Download Complete, now unzipping"
+msgstr "Download selesai, sekarang unzip"
+
+#: start.py:375 start.py:376
+msgid "Copying Files"
+msgstr "Mencopy file"
+
+#: start.py:382
+msgid "Grabbing Curl Files"
+msgstr "Meraih Curl File"
+
+#: start.py:390
+msgid "Failed to download curl files"
+msgstr "Gagal untuk mendownload curl file"
+
+#: start.py:431
+msgid "Quake already running"
+msgstr "Quake sudah berjalan"
+
+#: start.py:436
+msgid "Starting Quake2"
+msgstr "Mulai Quake2"
+
+#: start.py:453
+msgid "Shutdown Socket Server and Exit"
+msgstr "Mematikan Socket Server dan Keluar"
+
+#: start.py:459
+msgid "Checking for update"
+msgstr "Memerikasa Update"
+
+#: start.py:468
+msgid "Processing..."
+msgstr "Sedang di proses…"
+
+#: start.py:476
+msgid "Opening Account"
+msgstr "Membuka Akun"
+
+#: start.py:478 start.py:486
+msgid "Reply {} {}"
+msgstr "Balasan {} {}"
+
+#: start.py:491
+msgid "Error processing blocks"
+msgstr "Error saat memproses blok"
+
+#: start.py:498 start.py:643
+msgid "Timeout"
+msgstr "Waktu habis"
+
+#: start.py:500
+msgid "Account Not Open"
+msgstr "Akun tidak dibuka"
+
+#: start.py:507
+msgid "Starting NanoQuake2..."
+msgstr "Mulai NanoQuake2…"
+
+#: start.py:509
+msgid "Current Dir: {}"
+msgstr "Current Dir: {}"
+
+#: start.py:510
+msgid "System: {}"
+msgstr "System: {}"
+
+#: start.py:519
+msgid "Work Dir: {}"
+msgstr "Work Dir: {}"
+
+#: start.py:525 start.py:532
+msgid "Making a new config directory"
+msgstr "Membuat direktori config baru"
+
+#: start.py:537
+msgid "Error - system not recognised"
+msgstr "Error- sistem tidak di kenal"
+
+#: start.py:541
+msgid "Config Directory: {}"
+msgstr "Config Directory: {}"
+
+#: start.py:545
+msgid ""
+"Old seed file detected, as encryption has been upgraded please import your "
+"old seed, you can extract it with the decodeOldseed.py script"
+msgstr ""
+"File seed lama terdeteksi , karena enkripsi telah ditingkatkan, silakan "
+"impor seed lama Anda, Anda dapat mengekstraknya dengan skrip decodeOldseed."
+"py"
+
+#: start.py:577 start.py:593
+msgid "Public Key: "
+msgstr "Publik Key:"
+
+#: start.py:580 start.py:596
+msgid "Account Address: "
+msgstr "Alamat Akun:"
+
+#: start.py:587
+msgid "Seed file found"
+msgstr "File seed ditemukan"
+
+#: start.py:588
+msgid "Decoding wallet seed with your password"
+msgstr "Decoding wallet seed dengan kata sandi anda"
+
+#: start.py:604
+msgid "This is your game account address: {}"
+msgstr "Ini adalah alamat akun game anda: {}"
+
+#: start.py:607
+msgid ""
+"\n"
+"Balance: {:.3} Nano\n"
+msgstr ""
+"\n"
+"Saldo: {:.3} Nano \n"
+
+#: start.py:613
+msgid "NANO Rates"
+msgstr "Tarif Nano"
+
+#: start.py:631
+msgid "Your Game Account: "
+msgstr "Akun game anda:"
+
+#: start.py:638
+msgid "Your Balance: "
+msgstr "Saldo anda:"
+
+#: start.py:650
+msgid "Start Game"
+msgstr "Memulai Permainan"
+
+#: start.py:653
+msgid "Withdraw All"
+msgstr "Withdraw semua"
+
+#: start.py:656
+msgid "Exit"
+msgstr "Keluar"
