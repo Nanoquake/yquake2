@@ -535,7 +535,7 @@ def startGame(work_dir):
     game_args = "+set vid_fullscreen 0 &"
     print(game_args)
     if platform.system() == 'Windows':
-        windows_work_dir = r"{}".format(work_dir)
+        windows_work_dir = r'""{}""'.format(work_dir)
         full_command = "start " + windows_work_dir + "/release/yquake2 " + game_args
     else:
         full_command = work_dir + "/release/quake2 " + game_args
