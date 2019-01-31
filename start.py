@@ -1,5 +1,6 @@
 import binascii, time, io, pyqrcode, random, socket, sys, platform, os, threading, platform, hashlib, subprocess, urllib.request, zipfile, shutil
 from tkinter import *
+from tkinter import ttk
 import tornado.gen, tornado.ioloop, tornado.iostream, tornado.tcpserver
 from modules import nano
 from decimal import Decimal
@@ -21,19 +22,6 @@ last_pay_time = 0
 quake_running = 0
 
 languages = [("English", "en"), ("Français", "fr"), ("Español", "es"), ("bahasa Indonesia", "id")]
-
-def reporthook(blocknum, blocksize, totalsize):
-    readsofar = blocknum * blocksize
-    if totalsize > 0:
-        percent = readsofar * 1e2 / totalsize
-        if percent >= 100:
-            percent = 100
-        s = "\r%5.1f%% %*d / %d" % (percent, len(str(totalsize)), readsofar, totalsize)
-        sys.stderr.write(s)
-        if readsofar >= totalsize: # near the end
-            sys.stderr.write("\n")
-    else: # total size is unknown
-        sys.stderr.write("read %d\n" % (readsofar,))
 
 def read_encrypted(password, filename, string=True):
     #https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto
@@ -446,9 +434,27 @@ class DownloadDialog:
         c.pack(pady=5)
         d = Button(top, text=_("No"), command=self.closeWindow)
         d.pack(pady=5)
-    
+   
+        self.progressbar = ttk.Progressbar(top, length=300)
+        self.progressbar.pack(pady=5)
+
         self.e = Label(top, text=_("Download Status"))
         self.e.pack(pady=5)
+    
+    def reporthook(self, blocknum, blocksize, totalsize):
+        readsofar = blocknum * blocksize
+        if totalsize > 0:
+            percent = readsofar * 1e2 / totalsize
+            if percent >= 100:
+                percent = 100
+            s = "\r%5.1f%% %*d / %d" % (percent, len(str(totalsize)), readsofar, totalsize)
+            sys.stderr.write(s)
+            self.progressbar['value'] = percent
+            self.top.update()
+            if readsofar >= totalsize: # near the end
+                sys.stderr.write("\n")
+        else: # total size is unknown
+            sys.stderr.write("read %d\n" % (readsofar,))
     
     def download(self):
         if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
@@ -457,7 +463,7 @@ class DownloadDialog:
             self.top.update()
             
             try:
-                urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', self.work_dir + '/q2-314-demo-x86.exe', reporthook)
+                urllib.request.urlretrieve('http://deponie.yamagi.org/quake2/idstuff/q2-314-demo-x86.exe', self.work_dir + '/q2-314-demo-x86.exe', self.reporthook)
             except:
                 print(_("Failed to download demo files"))
                 time.sleep(5)
