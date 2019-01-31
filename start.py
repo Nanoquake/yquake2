@@ -282,14 +282,15 @@ class SelectLanguageDialog:
     def ok(self, *args):
 
         print(self.v.get())
-        parser = configparser.ConfigParser()
-        parser.add_section('general')
-        parser.set('general', 'language', self.v.get())
-        cfgfile = open(self.nanoquake_path + '/config.ini','w')
-        parser.write(cfgfile)
-        cfgfile.close()
+        if self.v.get() != "none":
+            parser = configparser.ConfigParser()
+            parser.add_section('general')
+            parser.set('general', 'language', self.v.get())
+            cfgfile = open(self.nanoquake_path + '/config.ini','w')
+            parser.write(cfgfile)
+            cfgfile.close()
         
-        self.top.destroy()
+            self.top.destroy()
 
     def get_lang(self):
         return self.v.get()
@@ -378,7 +379,7 @@ class disclaimerDialog:
         text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game.'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
-        e = Button(top, text=_("Back"), command=self.close)
+        e = Button(top, text=_("OK"), command=self.close)
         e.pack(pady=5, padx=10)
     
     def close(self):
