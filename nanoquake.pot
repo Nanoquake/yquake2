@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-01-27 16:27+0000\n"
+"POT-Creation-Date: 2019-02-17 15:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,252 +15,253 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: start.py:52
+#: Test/yquake2/start.py:40
 msgid "Error - empty seed, please delete your seedAES.txt and start again"
 msgstr ""
 
-#: start.py:124
+#: Test/yquake2/start.py:112
 msgid "Shutting down Quake"
 msgstr ""
 
-#: start.py:129
+#: Test/yquake2/start.py:117
 msgid "Pay Nano to Server"
 msgstr ""
 
-#: start.py:144 start.py:178
+#: Test/yquake2/start.py:132 Test/yquake2/start.py:166
 msgid "Error - empty balance"
 msgstr ""
 
-#: start.py:147 start.py:180
+#: Test/yquake2/start.py:135 Test/yquake2/start.py:168
 msgid "Error - timeout checking balance"
 msgstr ""
 
-#: start.py:156
+#: Test/yquake2/start.py:144
 msgid "Payment Sent"
 msgstr ""
 
-#: start.py:159
+#: Test/yquake2/start.py:147
 msgid "Error - insufficient funds"
 msgstr ""
 
-#: start.py:160
+#: Test/yquake2/start.py:148
 msgid "Error insufficent funds"
 msgstr ""
 
-#: start.py:163 start.py:164
+#: Test/yquake2/start.py:151 Test/yquake2/start.py:152
 msgid "Last pay in less that 30 seconds ago"
 msgstr ""
 
-#: start.py:169
+#: Test/yquake2/start.py:157
 msgid "Nano Balance"
 msgstr ""
 
-#: start.py:217
+#: Test/yquake2/start.py:205
 msgid "Listening on %s:%d..."
 msgstr ""
 
-#: start.py:241
+#: Test/yquake2/start.py:229
 msgid "Enter Your Password"
 msgstr ""
 
-#: start.py:247
+#: Test/yquake2/start.py:235
 msgid "Enter New Password"
 msgstr ""
 
-#: start.py:253
+#: Test/yquake2/start.py:241
 msgid "Confirm"
 msgstr ""
 
-#: start.py:259 start.py:328 start.py:418
+#: Test/yquake2/start.py:247 Test/yquake2/start.py:317
+#: Test/yquake2/start.py:382 Test/yquake2/start.py:407
 msgid "OK"
 msgstr ""
 
-#: start.py:322
+#: Test/yquake2/start.py:311
 msgid "Destination Address"
 msgstr ""
 
-#: start.py:334
+#: Test/yquake2/start.py:323
 msgid "Error - timeout, try again"
 msgstr ""
 
-#: start.py:352
+#: Test/yquake2/start.py:341
 msgid "Show Disclaimer"
 msgstr ""
 
-#: start.py:354
+#: Test/yquake2/start.py:343
 msgid "Show My Seed"
 msgstr ""
 
-#: start.py:356
+#: Test/yquake2/start.py:345
 msgid "Change My Language"
 msgstr ""
 
-#: start.py:358 start.py:393
+#: Test/yquake2/start.py:347
 msgid "Back"
 msgstr ""
 
-#: start.py:374
+#: Test/yquake2/start.py:363
 msgid "Restarting with new settings"
 msgstr ""
 
-#: start.py:390
+#: Test/yquake2/start.py:379
 msgid ""
 "DISCLAIMER\n"
 "* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n"
 "* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game."
 msgstr ""
 
-#: start.py:410
+#: Test/yquake2/start.py:399
 msgid "Generate New Seed"
 msgstr ""
 
-#: start.py:413
+#: Test/yquake2/start.py:402
 msgid "Import Seed"
 msgstr ""
 
-#: start.py:424
+#: Test/yquake2/start.py:413
 msgid "Wallet Seed (make a copy of this in a safe place!): {}"
 msgstr ""
 
-#: start.py:443
+#: Test/yquake2/start.py:432
 msgid "Download Pak Files"
 msgstr ""
 
-#: start.py:445
+#: Test/yquake2/start.py:434
 msgid "Yes"
 msgstr ""
 
-#: start.py:447
+#: Test/yquake2/start.py:436
 msgid "No"
 msgstr ""
 
-#: start.py:450
+#: Test/yquake2/start.py:442
 msgid "Download Status"
 msgstr ""
 
-#: start.py:455
+#: Test/yquake2/start.py:462
 msgid "Downloading..."
 msgstr ""
 
-#: start.py:456
+#: Test/yquake2/start.py:463
 msgid "Downloading Demo Pak..."
 msgstr ""
 
-#: start.py:462
+#: Test/yquake2/start.py:469
 msgid "Failed to download demo files"
 msgstr ""
 
-#: start.py:466
+#: Test/yquake2/start.py:473
 msgid "Download Complete, now unzipping..."
 msgstr ""
 
-#: start.py:467
+#: Test/yquake2/start.py:474
 msgid "Download Complete, now unzipping"
 msgstr ""
 
-#: start.py:472 start.py:473
+#: Test/yquake2/start.py:479 Test/yquake2/start.py:480
 msgid "Copying Files"
 msgstr ""
 
-#: start.py:479
+#: Test/yquake2/start.py:486
 msgid "Grabbing Curl Files"
 msgstr ""
 
-#: start.py:487
+#: Test/yquake2/start.py:494
 msgid "Failed to download curl files"
 msgstr ""
 
-#: start.py:528
+#: Test/yquake2/start.py:535
 msgid "Quake already running"
 msgstr ""
 
-#: start.py:533
+#: Test/yquake2/start.py:540
 msgid "Starting Quake2"
 msgstr ""
 
-#: start.py:550
+#: Test/yquake2/start.py:556
 msgid "Shutdown Socket Server and Exit"
 msgstr ""
 
-#: start.py:556
+#: Test/yquake2/start.py:562
 msgid "Checking for update"
 msgstr ""
 
-#: start.py:565
+#: Test/yquake2/start.py:571
 msgid "Processing..."
 msgstr ""
 
-#: start.py:573
+#: Test/yquake2/start.py:579
 msgid "Opening Account"
 msgstr ""
 
-#: start.py:575 start.py:583
+#: Test/yquake2/start.py:581 Test/yquake2/start.py:589
 msgid "Reply {} {}"
 msgstr ""
 
-#: start.py:588
+#: Test/yquake2/start.py:594
 msgid "Error processing blocks"
 msgstr ""
 
-#: start.py:595 start.py:779
+#: Test/yquake2/start.py:601 Test/yquake2/start.py:785
 msgid "Timeout"
 msgstr ""
 
-#: start.py:597
+#: Test/yquake2/start.py:603
 msgid "Account Not Open"
 msgstr ""
 
-#: start.py:713 start.py:729
+#: Test/yquake2/start.py:719 Test/yquake2/start.py:735
 msgid "Public Key: "
 msgstr ""
 
-#: start.py:716 start.py:732
+#: Test/yquake2/start.py:722 Test/yquake2/start.py:738
 msgid "Account Address: "
 msgstr ""
 
-#: start.py:723
+#: Test/yquake2/start.py:729
 msgid "Seed file found"
 msgstr ""
 
-#: start.py:724
+#: Test/yquake2/start.py:730
 msgid "Decoding wallet seed with your password"
 msgstr ""
 
-#: start.py:740
+#: Test/yquake2/start.py:746
 msgid "This is your game account address: {}"
 msgstr ""
 
-#: start.py:743
+#: Test/yquake2/start.py:749
 msgid ""
 "\n"
 "Balance: {:.3} Nano\n"
 msgstr ""
 
-#: start.py:749
+#: Test/yquake2/start.py:755
 msgid "NANO Rates"
 msgstr ""
 
-#: start.py:767
+#: Test/yquake2/start.py:773
 msgid "Your Game Account: "
 msgstr ""
 
-#: start.py:774
+#: Test/yquake2/start.py:780
 msgid "Your Balance: "
 msgstr ""
 
-#: start.py:786
+#: Test/yquake2/start.py:792
 msgid "Start Game"
 msgstr ""
 
-#: start.py:789
+#: Test/yquake2/start.py:795
 msgid "Withdraw All"
 msgstr ""
 
-#: start.py:792
+#: Test/yquake2/start.py:798
 msgid "Settings"
 msgstr ""
 
-#: start.py:795
+#: Test/yquake2/start.py:801
 msgid "Exit"
 msgstr ""
 

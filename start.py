@@ -21,7 +21,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 last_pay_time = 0
 quake_running = 0
 
-languages = [("English", "en"), ("Français", "fr"), ("Español", "es"), ("bahasa Indonesia", "id")]
+languages = [("English", "en"), ("Français", "fr"), ("Español", "es"), ("Nederlands", "nl"), ("bahasa Indonesia", "id"), ]
 
 def read_encrypted(password, filename, string=True):
     #https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto
