@@ -1,0 +1,280 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2019-02-17 15:38+0000\n"
+"PO-Revision-Date: 2019-02-25 21:25+0000\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.2.1\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: \n"
+"Language: pt_BR\n"
+
+#: Test/yquake2/start.py:40
+msgid "Error - empty seed, please delete your seedAES.txt and start again"
+msgstr ""
+"Erro - Seed vazia, por favor delete o arquivo seedAES.txt e comece de novo"
+
+#: Test/yquake2/start.py:112
+msgid "Shutting down Quake"
+msgstr "Encerrando Quake"
+
+#: Test/yquake2/start.py:117
+msgid "Pay Nano to Server"
+msgstr "Pague Nano para o servidor"
+
+#: Test/yquake2/start.py:132 Test/yquake2/start.py:166
+msgid "Error - empty balance"
+msgstr "Erro - Saldo vazio"
+
+#: Test/yquake2/start.py:135 Test/yquake2/start.py:168
+msgid "Error - timeout checking balance"
+msgstr "Erro - Tempo esgotado ao checar o saldo"
+
+#: Test/yquake2/start.py:144
+msgid "Payment Sent"
+msgstr "Pagamento enviado"
+
+#: Test/yquake2/start.py:147
+msgid "Error - insufficient funds"
+msgstr "Error - Saldo insuficiente"
+
+#: Test/yquake2/start.py:148
+msgid "Error insufficent funds"
+msgstr "Erro saldo insuficiente"
+
+#: Test/yquake2/start.py:151 Test/yquake2/start.py:152
+msgid "Last pay in less that 30 seconds ago"
+msgstr "Último pagamento realizado em menos de 30 segundos atrás"
+
+#: Test/yquake2/start.py:157
+msgid "Nano Balance"
+msgstr "Saldo em Nano"
+
+#: Test/yquake2/start.py:205
+msgid "Listening on %s:%d..."
+msgstr "Observando %s.%d..."
+
+#: Test/yquake2/start.py:229
+msgid "Enter Your Password"
+msgstr "Digite sua senha"
+
+#: Test/yquake2/start.py:235
+msgid "Enter New Password"
+msgstr "Digite sua nota senha"
+
+#: Test/yquake2/start.py:241
+msgid "Confirm"
+msgstr "Confirme"
+
+#: Test/yquake2/start.py:247 Test/yquake2/start.py:317
+#: Test/yquake2/start.py:382 Test/yquake2/start.py:407
+msgid "OK"
+msgstr "OK"
+
+#: Test/yquake2/start.py:311
+msgid "Destination Address"
+msgstr "Endereço de destino"
+
+#: Test/yquake2/start.py:323
+msgid "Error - timeout, try again"
+msgstr "Erro - tempo esgotado, tente novamente"
+
+#: Test/yquake2/start.py:341
+msgid "Show Disclaimer"
+msgstr "Mostrar o aviso legal"
+
+#: Test/yquake2/start.py:343
+msgid "Show My Seed"
+msgstr "Mostre minha seed"
+
+#: Test/yquake2/start.py:345
+msgid "Change My Language"
+msgstr "Mude meu idioma"
+
+#: Test/yquake2/start.py:347
+msgid "Back"
+msgstr "Voltar"
+
+#: Test/yquake2/start.py:363
+msgid "Restarting with new settings"
+msgstr "Reiniciando com as novas configurações"
+
+#: Test/yquake2/start.py:379
+msgid ""
+"DISCLAIMER\n"
+"* To participate in the NanoQuake events you must be a natural person who is "
+"at least 18 years of age or older.\n"
+"* It is your responsibility to determine whether the state, country, "
+"territory or jurisdiction in which you are located, permits the usage of "
+"NanoQuake software and the ability to pay-in to a game."
+msgstr ""
+"AVISO LEGAL\n"
+"* Para participar dos eventos NanoQuake você deve ser uma pessoa natural com "
+"pelo menos 18 anos de idade ou mais.\n"
+"* É de sua responsabilidade determinar se o estado, país, território ou "
+"jurisdição em que você está localizado permite o uso do software NanoQuake e "
+"a capacidade de pagamento para um jogo."
+
+#: Test/yquake2/start.py:399
+msgid "Generate New Seed"
+msgstr "Gerar nova Seed"
+
+#: Test/yquake2/start.py:402
+msgid "Import Seed"
+msgstr "Importar Seed"
+
+#: Test/yquake2/start.py:413
+msgid "Wallet Seed (make a copy of this in a safe place!): {}"
+msgstr "Seed da carteira (faça uma cópia disso em um local seguro!): {}"
+
+#: Test/yquake2/start.py:432
+msgid "Download Pak Files"
+msgstr "Baixando arquivos Pak"
+
+#: Test/yquake2/start.py:434
+msgid "Yes"
+msgstr "Sim"
+
+#: Test/yquake2/start.py:436
+msgid "No"
+msgstr "Não"
+
+#: Test/yquake2/start.py:442
+msgid "Download Status"
+msgstr "Status do Download"
+
+#: Test/yquake2/start.py:462
+msgid "Downloading..."
+msgstr "Baixando..."
+
+#: Test/yquake2/start.py:463
+msgid "Downloading Demo Pak..."
+msgstr "Baixando Demo Pak..."
+
+#: Test/yquake2/start.py:469
+msgid "Failed to download demo files"
+msgstr "Falha ao baixar os arquivos demo"
+
+#: Test/yquake2/start.py:473
+msgid "Download Complete, now unzipping..."
+msgstr "Download completo, descompactando..."
+
+#: Test/yquake2/start.py:474
+msgid "Download Complete, now unzipping"
+msgstr "Download completo, descompactando"
+
+#: Test/yquake2/start.py:479 Test/yquake2/start.py:480
+msgid "Copying Files"
+msgstr "Copiando os arquivos"
+
+#: Test/yquake2/start.py:486
+msgid "Grabbing Curl Files"
+msgstr "Obtendo arquivos Curl"
+
+#: Test/yquake2/start.py:494
+msgid "Failed to download curl files"
+msgstr "Falha ao baixar os arquivos curl"
+
+#: Test/yquake2/start.py:535
+msgid "Quake already running"
+msgstr "Quake já está rodando"
+
+#: Test/yquake2/start.py:540
+msgid "Starting Quake2"
+msgstr "Iniciando Quake2"
+
+#: Test/yquake2/start.py:556
+msgid "Shutdown Socket Server and Exit"
+msgstr "Encerre o servidor Socket e saia"
+
+#: Test/yquake2/start.py:562
+msgid "Checking for update"
+msgstr "Verificando atualizações"
+
+#: Test/yquake2/start.py:571
+msgid "Processing..."
+msgstr "Processando..."
+
+#: Test/yquake2/start.py:579
+msgid "Opening Account"
+msgstr "Abrindo conta"
+
+#: Test/yquake2/start.py:581 Test/yquake2/start.py:589
+msgid "Reply {} {}"
+msgstr "Resposta {} {}"
+
+#: Test/yquake2/start.py:594
+msgid "Error processing blocks"
+msgstr "Erro ao processar os blocos"
+
+#: Test/yquake2/start.py:601 Test/yquake2/start.py:785
+msgid "Timeout"
+msgstr "Tempo esgotado"
+
+#: Test/yquake2/start.py:603
+msgid "Account Not Open"
+msgstr "Conta não aberta"
+
+#: Test/yquake2/start.py:719 Test/yquake2/start.py:735
+msgid "Public Key: "
+msgstr "Chave pública "
+
+#: Test/yquake2/start.py:722 Test/yquake2/start.py:738
+msgid "Account Address: "
+msgstr "Endereço da conta "
+
+#: Test/yquake2/start.py:729
+msgid "Seed file found"
+msgstr "Arquivo da seed encontrado"
+
+#: Test/yquake2/start.py:730
+msgid "Decoding wallet seed with your password"
+msgstr "Decodificando a seed da Wallet com sua senha"
+
+#: Test/yquake2/start.py:746
+msgid "This is your game account address: {}"
+msgstr "Esse é seu endereço de conta no jogo: {}"
+
+#: Test/yquake2/start.py:749
+msgid ""
+"\n"
+"Balance: {:.3} Nano\n"
+msgstr ""
+"\n"
+"Saldo: {:.3} Nano\n"
+
+#: Test/yquake2/start.py:755
+msgid "NANO Rates"
+msgstr "Taxas em NANO"
+
+#: Test/yquake2/start.py:773
+msgid "Your Game Account: "
+msgstr "Sua conta no jogo "
+
+#: Test/yquake2/start.py:780
+msgid "Your Balance: "
+msgstr "Seu saldo "
+
+#: Test/yquake2/start.py:792
+msgid "Start Game"
+msgstr "Inicie o jogo"
+
+#: Test/yquake2/start.py:795
+msgid "Withdraw All"
+msgstr "Sacar tudo"
+
+#: Test/yquake2/start.py:798
+msgid "Settings"
+msgstr "Configurações"
+
+#: Test/yquake2/start.py:801
+msgid "Exit"
+msgstr "Sair"
