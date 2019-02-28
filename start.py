@@ -415,7 +415,11 @@ class GenerateSeedDialog:
     
     def import_func(self):
         self.wallet_seed = self.import_seed.get().upper()
-        self.top.destroy()
+        if len(self.wallet_seed) == 64:
+            self.top.destroy()
+        else:
+            print("Error - incorrect seed")
+            showinfo("NanoQuake", "Error - incorrect seed")
 
     def get_seed(self):
         return self.wallet_seed
@@ -433,8 +437,8 @@ class DownloadDialog:
         
         self.c = Button(top, text=_("Yes"), command=self.download)
         self.c.pack(pady=5)
-        d = Button(top, text=_("No"), command=self.closeWindow)
-        d.pack(pady=5)
+        self.d = Button(top, text=_("No"), command=self.closeWindow)
+        self.d.pack(pady=5)
    
         self.progressbar = ttk.Progressbar(top, length=300)
         self.progressbar.pack(pady=5)
@@ -459,6 +463,7 @@ class DownloadDialog:
     
     def download(self):
         self.c.config(state=DISABLED)
+        self.d.config(text=_("Close"))
         if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
             print(_("Downloading..."))
             self.e.config(text=_("Downloading Demo Pak..."))
@@ -493,25 +498,6 @@ class DownloadDialog:
                      shutil.copy(self.work_dir + '/curl/libssl-1_1-x64.dll', self.work_dir + '/release/libssl-1_1-x64.dll')
                 except:
                     print(_("Failed to download curl files"))
-            #print("Grabbing Maps")
-            #if Path(self.work_dir + '/release/baseq2/maps').exists() == False:
-            #    os.mkdir(self.work_dir + '/release/baseq2/maps')
-            
-            #print(" - q2dm1")
-            #try:
-            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/q2dm1.bsp', self.work_dir + '/release/baseq2/maps/q2dm1.bsp', reporthook)
-            #except:
-            #    print("Failed to download q2dm1")
-            #print(" - ztn2dm1")
-            #try:
-            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/ztn2dm1.bsp', self.work_dir + '/release/baseq2/maps/ztn2dm1.bsp', reporthook)
-            #except:
-            #    print("Failed to download ztn2dm1")
-            #print(" - tltf")
-            #try:
-            #    urllib.request.urlretrieve('http://www.andrewbullock.net/quake2/q2files/tourney/maps/tltf.bsp', self.work_dir + '/release/baseq2/maps/tltf.bsp', reporthook)
-            #except:
-            #    print("Failed to download tltf")
 
         self.top.destroy()
 
@@ -762,6 +748,10 @@ def main():
         
         f = DownloadDialog(root, work_dir)
         root.wait_window(f.top)
+    
+    if account == "xrb_33rhi9bp69i5zaftkyiacjmhwqnz1mcnfm9y6mpk8qx4xpht9cs9dzbxb9gb":
+        showinfo("NanoQuake", "Error incorrect seed - please delete seedAES.txt and restart NanoQuake")
+        sys.exit()
     
     data = 'xrb:' + account
     xrb_qr = pyqrcode.create(data)
