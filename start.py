@@ -242,7 +242,6 @@ class PasswordDialog:
         
             self.f = Entry(top, show='*')
             self.f.pack(padx=5)
-            self.f.focus()
         
         b = Button(top, text=_("OK"), command=self.ok)
         b.pack(pady=5)
