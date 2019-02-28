@@ -431,8 +431,8 @@ class DownloadDialog:
         
         Label(top, text=_("Download Pak Files")).pack()
         
-        c = Button(top, text=_("Yes"), command=self.download)
-        c.pack(pady=5)
+        self.c = Button(top, text=_("Yes"), command=self.download)
+        self.c.pack(pady=5)
         d = Button(top, text=_("No"), command=self.closeWindow)
         d.pack(pady=5)
    
@@ -458,6 +458,7 @@ class DownloadDialog:
             sys.stderr.write("read %d\n" % (readsofar,))
     
     def download(self):
+        self.c.config(state=DISABLED)
         if Path(self.work_dir + '/q2-314-demo-x86.exe').exists() == False:
             print(_("Downloading..."))
             self.e.config(text=_("Downloading Demo Pak..."))
