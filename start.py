@@ -243,7 +243,7 @@ class PasswordDialog:
             self.f = Entry(top, show='*')
             self.f.pack(padx=5)
         
-        b = Button(top, text=_("OK"), command=self.ok)
+        b = ttk.Button(top, text=_("OK"), command=self.ok)
         b.pack(pady=5)
     
     def ok(self, *args):
@@ -273,9 +273,9 @@ class SelectLanguageDialog:
         self.v.set("none") # initialize
         
         for lang, lang_code in languages:
-            a = Radiobutton(top, text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20)
+            a = ttk.Radiobutton(top, text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20)
         
-        b = Button(top, text="OK", command=self.ok)
+        b = ttk.Button(top, text="OK", command=self.ok)
         b.pack(pady=5, padx=5)
 
     def ok(self, *args):
@@ -313,7 +313,7 @@ class withdrawAllDialog:
         self.withdraw_dest.pack(padx=5)
         self.withdraw_dest.focus()
         
-        c = Button(top, text=_("OK"), command=self.withdraw)
+        c = ttk.Button(top, text=_("OK"), command=self.withdraw)
         c.pack(pady=5)
     
     def withdraw(self):
@@ -337,13 +337,13 @@ class settingsDialog:
         self.nanoquake_path = nanoquake_path
         self.wallet_seed = wallet_seed
         
-        b = Button(top, text=_("Show Disclaimer"), command=self.show_disclaimer)
+        b = ttk.Button(top, text=_("Show Disclaimer"), command=self.show_disclaimer)
         b.pack(pady=5, padx=10)
-        c = Button(top, text=_("Show My Seed"), command=self.show_seed)
+        c = ttk.Button(top, text=_("Show My Seed"), command=self.show_seed)
         c.pack(pady=5, padx=10)
-        d = Button(top, text=_("Change My Language"), command=self.change_lang)
+        d = ttk.Button(top, text=_("Change My Language"), command=self.change_lang)
         d.pack(pady=5, padx=10)
-        e = Button(top, text=_("Back"), command=self.close)
+        e = ttk.Button(top, text=_("Back"), command=self.close)
         e.pack(pady=5, padx=10)
     
     def close(self):
@@ -378,7 +378,7 @@ class disclaimerDialog:
         text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game.'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
-        e = Button(top, text=_("OK"), command=self.close)
+        e = ttk.Button(top, text=_("OK"), command=self.close)
         e.pack(pady=5, padx=10)
     
     def close(self):
@@ -395,7 +395,7 @@ class GenerateSeedDialog:
  
         self.wallet_seed = wallet_seed
         
-        generate = Button(top, text=_("Generate New Seed"), command=self.generateSeed)
+        generate = ttk.Button(top, text=_("Generate New Seed"), command=self.generateSeed)
         generate.pack(pady=5)
         
         Label(top, text=_("Import Seed")).pack()
@@ -403,7 +403,7 @@ class GenerateSeedDialog:
         self.import_seed = Entry(top)
         self.import_seed.pack(padx=5)
         
-        c = Button(top, text=_("OK"), command=self.import_func)
+        c = ttk.Button(top, text=_("OK"), command=self.import_func)
         c.pack(pady=5)
     
     def generateSeed(self):
@@ -434,9 +434,9 @@ class DownloadDialog:
         
         Label(top, text=_("Download Pak Files")).pack()
         
-        self.c = Button(top, text=_("Yes"), command=self.download)
+        self.c = ttk.Button(top, text=_("Yes"), command=self.download)
         self.c.pack(pady=5)
-        self.d = Button(top, text=_("No"), command=self.closeWindow)
+        self.d = ttk.Button(top, text=_("No"), command=self.closeWindow)
         self.d.pack(pady=5)
    
         self.progressbar = ttk.Progressbar(top, length=300)
@@ -779,16 +779,16 @@ def main():
     listbox = Listbox(root)
     listbox.pack(fill=BOTH, expand=1)
 
-    c = Button(root, text=_("Start Game"), command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
+    c = ttk.Button(root, text=_("Start Game"), command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
     c.pack(pady=5)
  
-    withdraw = Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
+    withdraw = ttk.Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
     withdraw.pack(pady=5)
 
-    settings = Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
+    settings = ttk.Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
     settings.pack(pady=5)
 
-    quit = Button(root, text=_("Exit"), command=exitGame)
+    quit = ttk.Button(root, text=_("Exit"), command=exitGame)
     quit.pack(pady=5)
 
     tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index, listbox,))
