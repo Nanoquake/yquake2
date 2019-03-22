@@ -351,7 +351,7 @@ class settingsDialog:
         self.top.destroy()
     
     def show_seed(self):
-        showinfo("NanoQuake", self.wallet_seed)
+        showinfo("NanoQuake", self.wallet_seed, parent=self.top)
 
     def change_lang(self):
 
@@ -422,7 +422,7 @@ class GenerateSeedDialog:
             self.top.destroy()
         else:
             print("Error - incorrect seed")
-            showinfo("NanoQuake", "Error - incorrect seed")
+            showinfo("NanoQuake", "Error - incorrect seed", parent=self.top)
 
     def get_seed(self):
         return self.wallet_seed
