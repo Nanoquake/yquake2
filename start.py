@@ -12,6 +12,8 @@ from Crypto.Cipher import AES
 import asyncio
 import gettext, configparser
 from tkinter.messagebox import showinfo
+from tkinter import font
+import webbrowser
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -218,6 +220,10 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
 class PasswordDialog:
     
     def __init__(self, parent, exists):
+
+        def callback(event):
+            webbrowser.open_new(r"https://github.com/Nanoquake/yquake2/wiki/FAQ")
+
         
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
@@ -226,27 +232,39 @@ class PasswordDialog:
         self.exists = exists
         
         if exists == True:
-            Label(top, text=_("Enter Your Password")).pack()
-            top.geometry("+180+100")
+            Label(top, pady=20, font=("system", 16), text=_("Enter Your Password")).pack()
+            top.geometry("500x200+0+100")
             self.e = Entry(top, show='*')
-            self.e.pack(padx=5)
+            self.e.pack(padx=5, pady=10)
             self.e.focus()
 
+            b = ttk.Button(top, text=_("OK"), command=self.ok)
+            b.pack(pady=20)
+
+
+            link = Label(top, text="Forgot password? ", fg="blue", cursor="hand2")
+            link.pack(side="right")
+            link.bind("<Button-1>", callback)
+
+
+
         else:
-            Label(top, text=_("Enter New Password")).pack()
-            top.geometry("+180+100") 
+            Label(top, font=("system", 16), text=_("Enter New Password")).pack()
+            top.geometry("500x200+0+100") 
             self.e = Entry(top, show='*')
-            self.e.pack(padx=5)
+            self.e.pack(padx=5, pady=10)
             self.e.focus()
             
-            Label(top, text=_("Confirm")).pack()
+            Label(top, font=("system", 16), text=_("Confirm")).pack()
         
             self.f = Entry(top, show='*')
-            self.f.pack(padx=5)
+            self.f.pack(padx=5, pady=10)
         
-        b = ttk.Button(top, text=_("OK"), command=self.ok)
-        b.pack(pady=5)
-    
+            b = ttk.Button(top, text=_("OK"), command=self.ok)
+            b.pack(pady=20, side=BOTTOM)
+
+
+
     def ok(self, *args):
 
         if self.exists == True:
@@ -269,7 +287,7 @@ class SelectLanguageDialog:
         top.bind('<Return>', self.ok)
         self.nanoquake_path = nanoquake_path
         self.lang = "None"
-        top.geometry("+180+100")        
+        top.geometry("500x300+0+100")        
         self.v = StringVar()
         self.v.set("none") # initialize
         
@@ -277,7 +295,7 @@ class SelectLanguageDialog:
             a = ttk.Radiobutton(top, text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20, pady=5)
         
         b = ttk.Button(top, text="OK", command=self.ok)
-        b.pack(pady=5, padx=5)
+        b.pack(pady=5, padx=5, side=BOTTOM)
 
     def ok(self, *args):
 
@@ -302,20 +320,20 @@ class withdrawAllDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.withdraw)
-        top.geometry("+180+100")        
+        top.geometry("500x200+0+100")        
         self.account = account
         self.index = index
         self.wallet_seed = wallet_seed
         self.listbox = listbox
 
-        Label(top, text=_("Destination Address")).pack()
+        Label(top, pady=20, font=("system", 16), text=_("Destination Address")).pack()
         
         self.withdraw_dest = Entry(top)
-        self.withdraw_dest.pack(padx=5)
+        self.withdraw_dest.pack(padx=5, pady=20)
         self.withdraw_dest.focus()
         
         c = ttk.Button(top, text=_("OK"), command=self.withdraw)
-        c.pack(pady=5)
+        c.pack(pady=5, side=BOTTOM)
     
     def withdraw(self):
         current_balance = nano.get_account_balance(self.account)
@@ -334,18 +352,20 @@ class settingsDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
-        top.geometry("+180+100")
+        top.geometry("500x200+0+100")
         self.nanoquake_path = nanoquake_path
         self.wallet_seed = wallet_seed
-        
-        b = ttk.Button(top, text=_("Show Disclaimer"), takefocus=False, command=self.show_disclaimer)
-        b.pack(pady=5, padx=10)
-        c = ttk.Button(top, text=_("Show My Seed"), takefocus=False, command=self.show_seed)
-        c.pack(pady=5, padx=10)
-        d = ttk.Button(top, text=_("Change My Language"), takefocus=False, command=self.change_lang)
-        d.pack(pady=5, padx=10)
+
+        Label(top, font=("system", 16), pady=15, text=_("Settings")).pack()        
         e = ttk.Button(top, text=_("Back"), command=self.close)
-        e.pack(pady=5, padx=10)
+        e.pack(pady=5, padx=10, side=BOTTOM)
+        c = ttk.Button(top, text=_("Show My Seed"), takefocus=False, command=self.show_seed)
+        c.pack(pady=5, padx=10, side=BOTTOM)
+        b = ttk.Button(top, text=_("Show Disclaimer"), takefocus=False, command=self.show_disclaimer)
+        b.pack(pady=5, padx=10, side=BOTTOM)
+        d = ttk.Button(top, text=_("Change My Language"), takefocus=False, command=self.change_lang)
+        d.pack(pady=5, padx=10, side=BOTTOM)
+
     
     def close(self):
         self.top.destroy()
@@ -374,14 +394,14 @@ class disclaimerDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
-        top.geometry("+0+100")
+        top.geometry("500x250+0+100")
         
         text = Text(top, width=62, height=10)
         text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game.'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
         e = ttk.Button(top, text=_("OK"), command=self.close)
-        e.pack(pady=5, padx=10)
+        e.pack(pady=5, padx=10, side=BOTTOM)
     
     def close(self):
         self.top.destroy()
@@ -394,20 +414,22 @@ class GenerateSeedDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.generateSeed)
-        top.geometry("+180+100")
-
+        top.geometry("500x200+0+100")
+ 
         self.wallet_seed = wallet_seed
 
-        generate = ttk.Button(top, text=_("Generate New Seed"), command=self.generateSeed)
-        generate.pack(pady=10)
        
-        Label(top, text=_("Import Seed")).pack()
+        Label(top, pady=5, font=("system", 16), text=_("Import Seed")).pack()
         
         self.import_seed = Entry(top)
-        self.import_seed.pack(padx=5)
+        self.import_seed.pack(padx=5, pady=5)
         
         c = ttk.Button(top, text=_("OK"), command=self.import_func)
-        c.pack(pady=5)
+        c.pack()
+
+
+        generate = ttk.Button(top, text=_("Generate New Seed"), command=self.generateSeed)
+        generate.pack(pady=15, ipadx=15, side=BOTTOM)
 
     
     def generateSeed(self):
@@ -435,17 +457,17 @@ class DownloadDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.download)
-        top.geometry("+100+100")
+        top.geometry("500x200+0+100")
         
-        Label(top, text=_("Download Pak Files")).pack()
+        Label(top, pady=15, font=("system", 16), text=_("Download Pak Files")).pack()
         
         self.c = ttk.Button(top, text=_("Yes"), command=self.download)
         self.c.pack(pady=5)
         self.d = ttk.Button(top, text=_("No"), command=self.closeWindow)
         self.d.pack(pady=5)
    
-        self.progressbar = ttk.Progressbar(top, length=300)
-        self.progressbar.pack(pady=5)
+        self.progressbar = ttk.Progressbar(top, length=500)
+        self.progressbar.pack(pady=10)
 
         self.e = Label(top, text=_("Download Status"))
         self.e.pack(pady=5)
@@ -785,16 +807,16 @@ def main():
     listbox.pack(fill=BOTH, expand=1)
 
     c = ttk.Button(root, text=_("Start Game"), takefocus=False, command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
-    c.pack(pady=5)
+    c.pack(pady=5, ipadx=5)
  
     withdraw = ttk.Button(root, text=_("Withdraw All"), takefocus=False, command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
-    withdraw.pack(pady=5)
+    withdraw.pack(pady=5, ipadx=5)
 
     settings = ttk.Button(root, text=_("Settings"), takefocus=False, command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
-    settings.pack(pady=5)
+    settings.pack(pady=5, ipadx=5)
 
     quit = ttk.Button(root, text=_("Exit"), command=exitGame)
-    quit.pack(pady=5)
+    quit.pack(pady=5, ipadx=5)
 
     tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index, listbox,))
     tcp.daemon = True
