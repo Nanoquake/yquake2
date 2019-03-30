@@ -12,6 +12,8 @@ from Crypto.Cipher import AES
 import asyncio
 import gettext, configparser
 from tkinter.messagebox import showinfo
+from tkinter import font
+import webbrowser
 
 raw_in_xrb = 1000000000000000000000000000000.0
 server_payin = 100000000000000000000000000000 #0.1Nano
@@ -218,7 +220,11 @@ class SimpleTcpServer(tornado.tcpserver.TCPServer):
 class PasswordDialog:
     
     def __init__(self, parent, exists):
-        
+
+
+        def callback(event):
+            webbrowser.open_new(r"https://github.com/Nanoquake/yquake2/wiki/FAQ")
+
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.ok)
@@ -226,26 +232,42 @@ class PasswordDialog:
         self.exists = exists
         
         if exists == True:
-            Label(top, text=_("Enter Your Password")).pack()
-            self.e = Entry(top, show='*')
-            self.e.pack(padx=5)
-            self.e.focus()
+            Label(top, pady=20, font=("Sans", 16), fg="white", bg="#000034", text=_("Enter Your Password")).pack()
+            top.geometry("500x200+0+0")
+            top.configure(bg="#000034") 
+            self.e = Entry(top, font=('Sans', 12), show='*')
+            self.e.pack(padx=5, pady=10)
+            self.e.focus_force()
+
+
+
+            b = Button(top, text=_("OK"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.ok)
+            b.pack(pady=10)
+
+
+            link = Label(top, text="Forgot password? ", fg="#4a90e2", bg="#000034", cursor="hand2")
+            link.pack(side="right")
+            link.bind("<Button-1>", callback)
+
 
         else:
-            Label(top, text=_("Enter New Password")).pack()
-        
+            Label(top, font=("Sans", 16), fg="white", bg="#000034", text=_("Enter New Password")).pack(pady=(10, 5))
+            top.geometry("500x200+0+0")
+            top.configure(bg="#000034") 
             self.e = Entry(top, show='*')
-            self.e.pack(padx=5)
-            self.e.focus()
+            self.e.pack(padx=5, pady=(0, 10))
+            self.e.focus_force()
             
-            Label(top, text=_("Confirm")).pack()
+            Label(top, font=("Sans", 16), fg="white", bg="#000034", text=_("Confirm")).pack()
         
             self.f = Entry(top, show='*')
-            self.f.pack(padx=5)
+            self.f.pack(padx=5, pady=(5, 10))
         
-        b = Button(top, text=_("OK"), command=self.ok)
-        b.pack(pady=5)
-    
+            b = Button(top, text=_("OK"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.ok)
+            b.pack(pady=20, side=BOTTOM)
+
+
+
     def ok(self, *args):
 
         if self.exists == True:
@@ -268,15 +290,18 @@ class SelectLanguageDialog:
         top.bind('<Return>', self.ok)
         self.nanoquake_path = nanoquake_path
         self.lang = "None"
-        
+        top.geometry("500x300+0+0")
+        top.configure(bg="#000034")        
         self.v = StringVar()
         self.v.set("none") # initialize
         
         for lang, lang_code in languages:
-            a = Radiobutton(top, text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20)
+            s = ttk.Style()
+            s.configure("TRadiobutton", font=('Sans', 12), background="#000034", foreground="white")
+            a = ttk.Radiobutton(top, style="TRadiobutton", text=lang, variable=self.v, value=lang_code).pack(fill=X, padx=20, pady=5)
         
-        b = Button(top, text="OK", command=self.ok)
-        b.pack(pady=5, padx=5)
+        b = Button(top, text="OK", width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.ok)
+        b.pack(pady=10, padx=5, side=BOTTOM)
 
     def ok(self, *args):
 
@@ -294,6 +319,7 @@ class SelectLanguageDialog:
     def get_lang(self):
         return self.v.get()
 
+
 class withdrawAllDialog:
     
     def __init__(self, parent, account, index, wallet_seed, listbox):
@@ -301,21 +327,28 @@ class withdrawAllDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.withdraw)
-        
+        top.geometry("500x200+0+0")
+        top.configure(bg="#000034")        
         self.account = account
         self.index = index
         self.wallet_seed = wallet_seed
         self.listbox = listbox
 
-        Label(top, text=_("Destination Address")).pack()
+        Label(top, pady=10, bg="#000034", fg="white", font=("Sans", 16), text=_("Destination Address")).pack()
         
         self.withdraw_dest = Entry(top)
-        self.withdraw_dest.pack(padx=5)
+        self.withdraw_dest.pack(fill=X, padx=10, pady=10)
         self.withdraw_dest.focus()
         
-        c = Button(top, text=_("OK"), command=self.withdraw)
+        c = Button(top, text=_("OK"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.withdraw)
         c.pack(pady=5)
+
+        e = Button(top, text=_("Back"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.close)
+        e.pack(pady=10, padx=10)
     
+    def close(self):
+        self.top.destroy()
+
     def withdraw(self):
         current_balance = nano.get_account_balance(self.account)
         if current_balance == "timeout":
@@ -333,24 +366,26 @@ class settingsDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
-
+        top.geometry("500x250+0+0")
+        top.configure(bg="#000034")
         self.nanoquake_path = nanoquake_path
         self.wallet_seed = wallet_seed
-        
-        b = Button(top, text=_("Show Disclaimer"), command=self.show_disclaimer)
-        b.pack(pady=5, padx=10)
-        c = Button(top, text=_("Show My Seed"), command=self.show_seed)
-        c.pack(pady=5, padx=10)
-        d = Button(top, text=_("Change My Language"), command=self.change_lang)
-        d.pack(pady=5, padx=10)
-        e = Button(top, text=_("Back"), command=self.close)
-        e.pack(pady=5, padx=10)
+
+        Label(top, font=("Sans", 16), bg="#000034", fg="white", pady=15, text=_("Settings")).pack()        
+        e = Button(top, text=_("Back"), width="20", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.close)
+        e.pack(pady=10, padx=10, side=BOTTOM)
+        c = Button(top, text=_("Show My Seed"), width="20", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", takefocus=False, command=self.show_seed)
+        c.pack(pady=10, padx=10, side=BOTTOM)
+        b = Button(top, text=_("Show Disclaimer"), width="20", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", takefocus=False, command=self.show_disclaimer)
+        b.pack(pady=10, padx=10, side=BOTTOM)
+        d = Button(top, text=_("Change My Language"), width="20", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white",takefocus=False, command=self.change_lang)
+        d.pack(pady=10, padx=10, side=BOTTOM)
     
     def close(self):
         self.top.destroy()
     
     def show_seed(self):
-        showinfo("NanoQuake", self.wallet_seed)
+        showinfo ("NanoQuake", self.wallet_seed, parent=self.top)
 
     def change_lang(self):
 
@@ -366,6 +401,7 @@ class settingsDialog:
         disclaimer = disclaimerDialog(self.top)
         self.top.wait_window(disclaimer.top)
 
+
 class disclaimerDialog:
     
     def __init__(self, parent):
@@ -373,13 +409,15 @@ class disclaimerDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.close)
+        top.geometry("500x250+0+0")
+        top.configure(bg="#000034")
         
-        text = Text(top, width=62, height=10)
-        text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory or jurisdiction in which you are located, permits the usage of NanoQuake software and the ability to pay-in to a game.'))
+        text = Text(top, width=62, height=10, font=('Sans', 10))
+        text.insert('1.0', _('DISCLAIMER\n* To participate in the NanoQuake events you must be a natural person\n who is at least 18 years of age or older.\n* It is your responsibility to determine whether the state, country, territory \nor jurisdiction in which you are located, permits the usage of NanoQuake \nsoftware and the ability to pay-in to a game.'))
         text.pack(pady=5, padx=10)
         text['state'] = 'disabled'
-        e = Button(top, text=_("OK"), command=self.close)
-        e.pack(pady=5, padx=10)
+        e = Button(top, text=_("OK"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.close)
+        e.pack(pady=10, padx=10, side=BOTTOM)
     
     def close(self):
         self.top.destroy()
@@ -392,19 +430,24 @@ class GenerateSeedDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.generateSeed)
+        top.geometry("500x200+0+0")
+        top.configure(bg="#000034")
  
         self.wallet_seed = wallet_seed
-        
-        generate = Button(top, text=_("Generate New Seed"), command=self.generateSeed)
-        generate.pack(pady=5)
-        
-        Label(top, text=_("Import Seed")).pack()
+
+       
+        Label(top, pady=5, font=("Sans", 16), bg="#000034", fg="white", text=_("Import Seed")).pack()
         
         self.import_seed = Entry(top)
-        self.import_seed.pack(padx=5)
+        self.import_seed.pack(fill=X, padx=20, pady=5)
         
-        c = Button(top, text=_("OK"), command=self.import_func)
+        c = Button(top, text=_("OK"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.import_func)
         c.pack(pady=5)
+
+
+        generate = Button(top, text=_("Generate New Seed"), font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.generateSeed)
+        generate.pack(pady=15, ipadx=15, side=BOTTOM)
+
     
     def generateSeed(self):
         full_wallet_seed = hex(random.SystemRandom().getrandbits(256))
@@ -418,7 +461,7 @@ class GenerateSeedDialog:
             self.top.destroy()
         else:
             print("Error - incorrect seed")
-            showinfo("NanoQuake", "Error - incorrect seed")
+            showinfo("NanoQuake", "Error - incorrect seed", parent=self.top)
 
     def get_seed(self):
         return self.wallet_seed
@@ -431,18 +474,20 @@ class DownloadDialog:
         top = self.top = Toplevel(parent)
         top.title("NanoQuake")
         top.bind('<Return>', self.download)
+        top.geometry("500x200+0+0")
+        top.configure(bg="#000034")
         
-        Label(top, text=_("Download Pak Files")).pack()
+        Label(top, pady=15, font=("Sans", 16), bg="#000034", fg="white", text=_("Download Pak Files")).pack()
         
-        self.c = Button(top, text=_("Yes"), command=self.download)
+        self.c = Button(top, text=_("Yes"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.download)
         self.c.pack(pady=5)
-        self.d = Button(top, text=_("No"), command=self.closeWindow)
+        self.d = Button(top, text=_("No"), width="10", font=('Sans', 10), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", command=self.closeWindow)
         self.d.pack(pady=5)
    
-        self.progressbar = ttk.Progressbar(top, length=300)
-        self.progressbar.pack(pady=5)
+        self.progressbar = ttk.Progressbar(top, length=500)
+        self.progressbar.pack(pady=10)
 
-        self.e = Label(top, text=_("Download Status"))
+        self.e = Label(top, font=("Sans", 10), bg="#000034", fg="white", text=_("Download Status"))
         self.e.pack(pady=5)
     
     def reporthook(self, blocknum, blocksize, totalsize):
@@ -637,13 +682,16 @@ def main():
     exists = Path(nanoquake_path + '/seedAES.txt').exists()
 
     root = Tk()
-    root.geometry("500x700")
-    w = Label(root, text="NanoQuake v1.6", bg="blue4", fg="white")
-    w.pack(fill=X)
-    root.wm_title("NanoQuake v1.6")
+    root.overrideredirect(1)
+    root.withdraw()
+    root.geometry("500x650+0+0")
+    root.configure(background="#000034")
+    root.wm_title("NanoQuake v1.62")
     root.iconbitmap("nanoquake.ico")
 
     root.update()
+
+
 
     parser = configparser.ConfigParser()
     config_files = parser.read(nanoquake_path + '/config.ini')
@@ -747,10 +795,21 @@ def main():
         
         f = DownloadDialog(root, work_dir)
         root.wait_window(f.top)
+
     
     if account == "xrb_33rhi9bp69i5zaftkyiacjmhwqnz1mcnfm9y6mpk8qx4xpht9cs9dzbxb9gb":
         showinfo("NanoQuake", "Error incorrect seed - please delete seedAES.txt and restart NanoQuake")
         sys.exit()
+
+
+    root.deiconify()
+    root.overrideredirect(0)
+
+
+    w = Label(root, font=('Sans', 10), fg="#F4FAFF", bg="#000034", text=_("Your Game Account: "))
+    w.pack(pady=5)
+
+
     
     data = 'xrb:' + account
     xrb_qr = pyqrcode.create(data)
@@ -758,38 +817,41 @@ def main():
     code_bmp = BitmapImage(data=code_xbm)
     code_bmp.config(background="white")
     label = Label(root, image=code_bmp)
-    label.pack()
-    
-    w = Label(root, text=_("Your Game Account: "))
-    w.pack()
+    label.pack(pady=5)
+
     data_string = StringVar()
     data_string.set(account)
-    w = Entry(root, textvariable=data_string, fg="black", bg="white", bd=0, state="readonly")
+    w = Entry(root, textvariable=data_string, justify="center", state="readonly")
+    w.config(bd="0", font=('Sans', 10), fg="white", readonlybackground="#000034")
     w.pack()
-    w.pack(fill=X)
-    y = Label(root, text=_("Your Balance: "))
+    w.pack(pady=(5, 10), fill=X)    
+
+    y = Label(root, font=('Sans', 10), fg="#F4FAFF", bg="#000034", text=_("Your Balance: "))
     y.pack()
     if current_balance != "timeout":
-        y = Label(root, text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
+        y = Label(root, font=('Sans', 14, 'bold'), fg="white", bg="#000034", text="{:.3} Nano".format(Decimal(current_balance) / Decimal(raw_in_xrb)))
     else:
-        y = Label(root, text=_("Timeout"))
+        y = Label(root, fg="white", bg="#000034", text=_("Timeout"))
 
-    y.pack()
+    y.pack(pady=(0, 5))
 
-    listbox = Listbox(root)
-    listbox.pack(fill=BOTH, expand=1)
+    listbox = Listbox(root, bg="white")
+    listbox.pack(fill=BOTH, padx=5, expand=1)
 
-    c = Button(root, text=_("Start Game"), command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
-    c.pack(pady=5)
+
+    c = Button(root, text=_("Start Game"), width="12", font=('Sans', 12), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", takefocus=False, command=lambda: thread_startGame(work_dir, account, wallet_seed, index))
+    c.pack(pady=(20, 0), ipadx=20)
  
-    withdraw = Button(root, text=_("Withdraw All"), command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
-    withdraw.pack(pady=5)
+    withdraw = Button(root, text=_("Withdraw All"), width="12", font=('Sans', 12), relief=RIDGE, bd="0", bg="#4a90e2", fg="white", takefocus=False, command=lambda: withdrawAllDialog(root, account, index, wallet_seed, listbox))
+    withdraw.pack(pady=20, ipadx=20)
 
-    settings = Button(root, text=_("Settings"), command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
-    settings.pack(pady=5)
 
-    quit = Button(root, text=_("Exit"), command=exitGame)
-    quit.pack(pady=5)
+    settings = Button(root, font=('Sans', 20), relief=RIDGE, bd="0", text=_("⚙"), bg="#000034", fg="#4a90e2", activebackground="#000034", activeforeground="white", takefocus=False, command=lambda: settingsDialog(root, nanoquake_path, wallet_seed))
+    settings.place(relx=.88, rely=.01)
+
+
+#    quit = Button(root, text=_("Exit"), command=exitGame)
+#    quit.pack(pady=5)
 
     tcp = threading.Thread(target=start_server, args=(account, wallet_seed, index, listbox,))
     tcp.daemon = True
