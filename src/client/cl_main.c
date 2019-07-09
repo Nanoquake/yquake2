@@ -638,6 +638,7 @@ CL_NanoAddress_f(void)
     
     char new_nano_address[60];
     memcpy(new_nano_address, server_reply, 60);
+    new_nano_address[60] = 0;
     Com_Printf("Nano Address: %s-\n", new_nano_address);
     Cvar_Set("nano_address", new_nano_address);
     
